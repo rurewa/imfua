@@ -42,7 +42,7 @@
 
 **Минимальные требования к студентам:**
 
-1. В учёбе по **IT** дисциплинам лучше использовать какой-нибудь **Linux**, например [Альт Образование 11](https://www.basealt.ru/alt-education)
+1. В учёбе по **IT** дисциплинам рекомендуется использовать какой-нибудь **Linux**, например [Альт Образование 11](https://www.basealt.ru/alt-education)
 1. Для пользователей **Linux** [инструкция по получению и настройке Альт Линукс Образование 11](/content/Linux/README.md)
 1. Для пользователей **Windows 10/11** установку приложений в **Windows** рекомендуется использовать [**WinGet**](https://learn.microsoft.com/ru-ru/windows/package-manager/winget/)! Проверить у себя в **PowerShell** установленный **WinGet** командой `winget --info`. Если не установлен, то:
     - Установить [WinGet - Windows Package Manager](https://apps.microsoft.com/detail/9nblggh4nns1?hl=ru-RU&gl=RU) или [с Github](https://github.com/microsoft/winget-cli/releases)
