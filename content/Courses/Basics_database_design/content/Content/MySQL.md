@@ -1,4 +1,4 @@
-Интерактивная работа с MySQL в изолированном окружении Docker. 
+## Интерактивная работа с MySQL в изолированном окружении Docker. 
 
 - запустить «чистый» контейнер
 - подключиться к нему
@@ -6,15 +6,32 @@
 
 ### 🚀 Шаг 1: Запуск контейнера MySQL
 
-Сначала нужно запустить контейнер. Мы будем использовать официальный образ MySQL. Выполните следующую команду в терминале:
+- Создайте отдельный каталог `my-mysql` и перейдите в него.
+- Создайте в каталоге `my-mysql` файл `my.cnf` с содержимым:
+```shell
+[mysqld]
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
 
+[client]
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4
+```
+Контейнер с официального образа MySQL:
 ```bash
-docker run --name my-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:latest
+docker run --name my-mysql \
+  -e MYSQL_ROOT_PASSWORD=123 \
+  -e LANG=C.UTF-8 \
+  -v mysql_data:/var/lib/mysql \
+  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
+  -d mysql:latest
 ```
 
 Разберем, что делает эта команда:
 *   `--name my-mysql`: Присваивает контейнеру понятное имя `my-mysql`, чтобы не использовать его ID.
-*   `-e MYSQL_ROOT_PASSWORD=my-secret-pw`: Устанавливает пароль для пользователя `root`. **Обязательно замените `my-secret-pw` на свой надежный пароль.**
+*   `-e MYSQL_ROOT_PASSWORD=123`: Устанавливает пароль для пользователя root. В учебном примере — 123, в реальных проектах используйте надёжный пароль **Обязательно замените `123` на свой надежный пароль!**
 *   `-d`: Запускает контейнер в фоновом режиме (detached mode).
 *   `mysql:latest`: Указывает, что нужно использовать последнюю версию официального образа MySQL.
 
@@ -31,7 +48,7 @@ docker ps
 Выполните следующую команду, чтобы открыть интерактивную оболочку MySQL:
 
 ```bash
-docker exec -it my-mysql mysql -uroot -p
+docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
 *   `-it`: Флаги `-i` (interactive) и `-t` (tty) вместе создают интерактивный терминал.
 *   `mysql -uroot -p`: Запускает клиент MySQL от имени пользователя `root` и запрашивает пароль.
@@ -42,19 +59,41 @@ docker exec -it my-mysql mysql -uroot -p
 
 Внутри оболочки MySQL вы можете выполнять все стандартные SQL-команды.
 
+Проверить кодировку сразу после подключения:
+```sql
+SHOW VARIABLES LIKE 'character_set%';
+```
+Если `character_set_client`, `character_set_connection` и `character_set_results` равны `utf8mb4` — всё в порядке.
+
 **1. Просмотр существующих баз данных**
 ```sql
 SHOW DATABASES;
 ```
 Эта команда покажет список всех баз данных, включая системные (`information_schema`, `mysql`, `performance_schema`, `sys`).
 
-**2. Создание новой базы данных**
+**2. Создание новой базы данных и таблицы в ней**
 ```sql
 CREATE DATABASE my_database;
 ```
 Создадим базу данных с именем `my_database`. Рекомендуется сразу указывать кодировку:
 ```sql
-CREATE DATABASE my_database CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE my_database
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+USE my_database;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+INSERT INTO users (name, email) VALUES
+  ('Иван Иванов', 'ivan@example.com'),
+  ('Пётр Петров', 'petr@example.com'),
+  ('Мария Сидорова', 'maria@example.com');
+
+SELECT * FROM users;
 ```
 
 **3. Выбор базы данных для работы**
@@ -63,77 +102,78 @@ USE my_database;
 ```
 Теперь все последующие команды будут применяться к этой базе данных.
 
-**4. Создание таблицы**
+Получить существующие таблицы
 ```sql
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-Эта команда создаст таблицу `users` с полями `id`, `name`, `email` и `created_at`.
-
-**5. Вставка данных**
-```sql
-INSERT INTO users (name, email) VALUES ('Иван Иванов', 'ivan@example.com');
-INSERT INTO users (name, email) VALUES ('Петр Петров', 'petr@example.com');
+SHOW TABLES;
 ```
 
-**6. Просмотр данных**
+**4. Вставка данных**
+```sql
+INSERT INTO users (name, email) VALUES ('Павел Иванов', 'pavel@example.com');
+INSERT INTO users (name, email) VALUES ('Марк Аврелий', 'mark@example.com');
+```
+Проверка кодировки после вставки:
+```sql
+SELECT name, HEX(name) FROM users WHERE id = 1;
+```
+
+**5. Просмотр данных**
 ```sql
 SELECT * FROM users;
 ```
 
-**7. Обновление данных**
+**6. Обновление данных**
 ```sql
 UPDATE users SET name = 'Иван Петров' WHERE id = 1;
 ```
 или
 ```sql
-UPDATE users SET name = 'Vasy' WHERE id = 1;
+UPDATE users SET name = 'Vasya' WHERE id = 1;
 ```
 
-**8. Удаление данных**
+Посмотреть все строки таблицы
+```sql
+SELECT * FROM users;
+```
+Посмотреть одну конкретную строку
+```sql
+SELECT * FROM users WHERE id = 1;
+```
+Посмотреть только нужные столбцы
+```sql
+SELECT name, email FROM users WHERE id = 1;
+```
+Удобный вертикальный вывод
+```sql
+SELECT * FROM users WHERE id = 1\G
+```
+`\G` заменяет точку с запятой и не требует `;` в конце
+
+**7. Удаление данных**
 ```sql
 DELETE FROM users WHERE id = 2;
 ```
+Если удалить `WHERE`, удалятся все строки
 
-**9. Удаление таблицы**
+**8. Удаление таблицы**
 ```sql
 DROP TABLE users;
 ```
+Получить существующие таблицы
+```sql
+SHOW TABLES;
+```
 
-**10. Удаление базы данных**
+**9. Удаление базы данных**
 ```sql
 DROP DATABASE my_database;
 ```
+Просмотр существующих баз данных**
+```sql
+SHOW DATABASES;
+```
 
-### 💾 Шаг 4: Сохранение данных (Важно!)
-
-По умолчанию все данные, созданные внутри контейнера, **будут потеряны** при его удалении. Чтобы этого избежать, необходимо использовать **Docker Volume**.
-
-1.  Сначала удалите текущий контейнер (если он еще существует), чтобы создать новый с volume:
-    ```bash
-    docker stop my-mysql
-    docker rm my-mysql
-    ```
-
-2.  Создайте именованный volume:
-    ```bash
-    docker volume create mysql_data
-    ```
-
-3.  Запустите новый контейнер, подключив к нему созданный volume. Директория `/var/lib/mysql` внутри контейнера — это место, где MySQL хранит свои данные.
-    ```bash
-    docker run --name my-mysql \
-      -e MYSQL_ROOT_PASSWORD=my-secret-pw \
-      -v mysql_data:/var/lib/mysql \
-      -d mysql:latest
-    ```
-    Теперь все данные, созданные в этой базе, будут сохраняться в volume `mysql_data` на вашем хосте, и вы сможете их восстановить даже после удаления контейнера.
-
-### 🧹 Шаг 5: Управление контейнером
+### 🧹 Шаг 4: Управление контейнером
 
 *   **Остановка контейнера:**
     ```bash
@@ -153,6 +193,17 @@ DROP DATABASE my_database;
     ```
     Флаг `-v` также удалит связанный с контейнером volume. **Будьте осторожны: это приведет к безвозвратной потере данных.**
 
-### 💎 Итог
+Если нужно пересоздать контейнер с сохранением данных:
+```shell
+docker stop my-mysql
+docker rm my-mysql
+docker run --name my-mysql \
+  -e MYSQL_ROOT_PASSWORD=123 \
+  -e LANG=C.UTF-8 \
+  -v mysql_data:/var/lib/mysql \
+  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
+  -d mysql:latest
+```
 
-Теперь у вас есть полностью рабочее окружение для изучения MySQL. Вы можете практиковаться в создании, изменении и удалении баз данных и таблиц, не беспокоясь о своей основной системе. Удачи в обучении
+
+> Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
