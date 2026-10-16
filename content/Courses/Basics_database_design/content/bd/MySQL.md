@@ -212,17 +212,13 @@ docker run --name my-mysql \
 ## 🔌 Подключение к контейнеру
 
 Если контейнер ещё не запущен, запустите его:
-
 ```bash
 docker start my-mysql
 ```
-
 Подключитесь к MySQL:
-
 ```bash
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
-
 Введите пароль `123`. Вы увидите приглашение `mysql>`.
 
 ---
@@ -236,9 +232,7 @@ CREATE DATABASE sql_practice
 
 USE sql_practice;
 ```
-
 Проверить, что база создана:
-
 ```sql
 SHOW DATABASES;
 ```
@@ -247,8 +241,7 @@ SHOW DATABASES;
 
 ## 📋 Шаг 2: Создание таблиц
 
-Создадим две связанные таблицы: `customers` (клиенты) и `orders` (заказы).
-
+Создадим две связанные таблицы: `customers` (клиенты) и `orders` (заказы):
 ```sql
 CREATE TABLE customers (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -313,13 +306,11 @@ SELECT * FROM orders;
 ```sql
 SELECT * FROM customers;
 ```
-
 ### 4.2. Только нужные столбцы
 ```sql
 SELECT name, city FROM customers;
 ```
-
-### 4.3. Условие WHERE
+### 4.3. Условие WHERE (ГДЕ)
 ```sql
 SELECT * FROM customers WHERE city = 'Москва';
 SELECT * FROM orders WHERE amount > 1000;
@@ -340,19 +331,23 @@ SELECT * FROM orders ORDER BY order_date DESC, amount ASC;
 ```sql
 SELECT * FROM orders ORDER BY amount DESC LIMIT 3;
 ```
-
 ### 4.6. Поиск по шаблону LIKE
 ```sql
 SELECT * FROM customers WHERE name LIKE 'И%';      -- начинается на И
 SELECT * FROM customers WHERE email LIKE '%@example.com';
 ```
-
 ### 4.7. Диапазон BETWEEN, список IN
 ```sql
 SELECT * FROM orders WHERE amount BETWEEN 1000 AND 3000;
 SELECT * FROM customers WHERE city IN ('Москва', 'Казань');
 ```
-Подробней про IN
+Оператор **IN** — это логический оператор, который проверяет, входит ли значение в заданный список. Он является сокращённой формой цепочки OR (ИЛИ, дизъюнкция).
+
+Это то же самое, что:
+```sql
+SELECT * FROM customers WHERE city = 'Москва' OR city = 'Казань';
+```
+Результат одинаковый — обе строки вернут клиентов из Москвы и Казани. Но IN короче, читабельнее и удобнее, особенно если значений много.
 
 ### 4.8. Пустые значения IS NULL
 ```sql
@@ -399,6 +394,16 @@ JOIN orders o ON c.id = o.customer_id
 GROUP BY c.id, c.name
 ORDER BY total_amount DESC;
 ```
+В этом запросе c и o — это алиасы таблиц (псевдонимы). Они задаются сразу после имени таблицы в FROM и JOIN:
+```sql
+FROM customers c
+JOIN orders o ON c.id = o.customer_id
+```
+Здесь:
+- customers c — таблица customers получает псевдоним c.
+- orders o — таблица orders получает псевдоним o.
+
+Дальше в запросе можно писать `c.name` вместо `customers.name`, а `o.id` вместо `orders.id`. Это короче, удобнее и помогает, когда в разных таблицах есть столбцы с одинаковыми именами (например, `id` есть и в `customers`, и в `orders`).
 
 ### 6.3. Фильтрация групп HAVING
 ```sql
@@ -418,6 +423,7 @@ SELECT c.name, o.order_date, o.amount, o.status
 FROM customers c
 INNER JOIN orders o ON c.id = o.customer_id;
 ```
+Подробней о JOIN вообще и INNER JOIN (внутреннее соединение) в частности
 
 ### 7.2. LEFT JOIN — все клиенты, даже без заказов
 ```sql
@@ -434,6 +440,7 @@ SELECT c.name, o.id AS order_id
 FROM customers c
 RIGHT JOIN orders o ON c.id = o.customer_id;
 ```
+что за c.* ?
 
 ---
 
@@ -451,7 +458,7 @@ SELECT * FROM customers WHERE id = 4;
 SELECT * FROM orders WHERE id = 3;
 ```
 
-⚠️ **Важно:** всегда указывайте `WHERE`, иначе обновятся все строки.
+⚠️ **Важно:** всегда указывайте `WHERE`, иначе обновятся все строки!
 
 ---
 
@@ -477,6 +484,15 @@ SELECT * FROM orders;
 ```sql
 ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
 ```
+Обновить данные в столбце phone
+```sql
+UPDATE customers SET phone = '123' WHERE id = 4;
+```
+Проверить
+```sql
+SELECT * FROM customers WHERE id = 4;
+```
+
 
 ### Изменить тип столбца
 ```sql
@@ -494,8 +510,14 @@ ALTER TABLE customers DROP COLUMN phone;
 
 ```sql
 DROP TABLE orders;
+SHOW TABLES;
 DROP TABLE customers;
+SHOW TABLES;
 DROP DATABASE sql_practice;
+```
+Проверить
+```sql
+SHOW DATABASES;
 ```
 
 ---
