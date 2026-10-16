@@ -1,9 +1,23 @@
 ## Интерактивная работа с MySQL в изолированном окружении Docker.
 
+Навигация:
+- [Docker + MySQL + кириллица](#docker)
+- [Создание БД и таблиц](#create-db)
+- [CRUD-операции](#crud)
+- [Фильтрация, сортировка, ограничение](#filter)
+- [Агрегация и группировка](#aggregate)
+- [Все основные типы JOIN](#join)
+- [Подзапросы и UNION](#subqueries)
+- [Изменение структуры](#alter)
+- [Удаление объектов](#drop)
+- [Направления для дальнейшего изучения](#next)
+
+Задачи:
 - запустить «чистый» контейнер
 - подключиться к нему
 - выполнять основные операции с базами данных
 
+<a id="docker"></a>
 ### 🚀 Шаг 1: Запуск контейнера MySQL
 
 - Создайте отдельный каталог `my-mysql` и перейдите в него.
@@ -31,7 +45,7 @@ docker run --name my-mysql \
 
 Разберем, что делает эта команда:
 *   `--name my-mysql`: Присваивает контейнеру понятное имя `my-mysql`, чтобы не использовать его ID.
-*   `-e MYSQL_ROOT_PASSWORD=123`: Устанавливает пароль для пользователя root. В учебном примере — 123, в реальных проектах используйте надёжный пароль **Обязательно замените `123` на свой надежный пароль!**
+*   `-e MYSQL_ROOT_PASSWORD=123`: Устанавливает пароль для пользователя root. В учебном примере — 123, в реальных проектах используйте надёжный пароль.
 *   `-d`: Запускает контейнер в фоновом режиме (detached mode).
 *   `mysql:latest`: Указывает, что нужно использовать последнюю версию официального образа MySQL.
 
@@ -45,7 +59,7 @@ docker ps
 
 Теперь, когда контейнер работает, к нему нужно подключиться. Для этого используется команда `docker exec`, которая позволяет выполнить команду внутри работающего контейнера.
 
-Выполните следующую команду, чтобы открыть интерактивную оболочку MySQL:
+Выполните следующую команду, чтобы открыть интерактивную оболочку **MySQL**:
 
 ```bash
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
@@ -110,7 +124,7 @@ SHOW TABLES;
 INSERT INTO users (name, email) VALUES ('Павел Иванов', 'pavel@example.com');
 INSERT INTO users (name, email) VALUES ('Марк Аврелий', 'mark@example.com');
 ```
-Проверка кодировки после вставки (зачем?):
+Проверка кодировки после вставки:
 ```sql
 SELECT name, HEX(name) FROM users WHERE id = 1;
 ```
@@ -128,7 +142,6 @@ UPDATE users SET name = 'Иван Петров' WHERE id = 1;
 ```sql
 UPDATE users SET name = 'Vasya' WHERE id = 1;
 ```
-
 Посмотреть все строки таблицы
 ```sql
 SELECT * FROM users;
@@ -166,7 +179,7 @@ SHOW TABLES;
 ```sql
 DROP DATABASE my_database;
 ```
-Просмотр существующих баз данных**
+Просмотр существующих баз данных
 ```sql
 SHOW DATABASES;
 ```
@@ -223,6 +236,7 @@ docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 
 ---
 
+<a id="create-db"></a>
 ## 🗄️ Шаг 1: Создание учебной базы данных
 
 ```sql
@@ -272,6 +286,7 @@ DESCRIBE orders;
 
 ---
 
+<a id="crud"></a>
 ## ✍️ Шаг 3: Вставка данных (INSERT)
 
 ```sql
@@ -290,7 +305,7 @@ INSERT INTO orders (customer_id, order_date, amount, status) VALUES
   (3, '2026-10-10', 1100.00, 'cancelled'),
   (4, '2026-10-12', 950.00, 'new');
 ```
-`customers` - клиенты, `paid` - оплачено
+`customers` — клиенты, `paid` — оплачено
 
 Проверить, что данные вставились:
 ```sql
@@ -300,6 +315,7 @@ SELECT * FROM orders;
 
 ---
 
+<a id="filter"></a>
 ## 🔍 Шаг 4: Выборка данных (SELECT)
 
 ### 4.1. Все столбцы и все строки
@@ -317,7 +333,7 @@ SELECT * FROM orders WHERE amount > 1000;
 SELECT * FROM orders WHERE status = 'paid' AND amount > 1500;
 SELECT * FROM orders WHERE status = 'new' OR status = 'cancelled';
 ```
-`amount` - сумма
+`amount` — сумма
 
 ### 4.4. Сортировка ORDER BY
 ```sql
@@ -325,7 +341,7 @@ SELECT * FROM customers ORDER BY name;
 SELECT * FROM orders ORDER BY amount DESC;
 SELECT * FROM orders ORDER BY order_date DESC, amount ASC;
 ```
-`SELECT FROM orders ORDER BY` - выбрать из заказов по сумме
+Сортировка заказов по сумме (от большей к меньшей)
 
 ### 4.5. Ограничение количества строк LIMIT
 ```sql
@@ -356,6 +372,7 @@ SELECT * FROM customers WHERE city IS NULL;
 
 ---
 
+<a id="aggregate"></a>
 ## 📊 Шаг 5: Агрегатные функции
 
 Всего заказов
@@ -394,16 +411,7 @@ JOIN orders o ON c.id = o.customer_id
 GROUP BY c.id, c.name
 ORDER BY total_amount DESC;
 ```
-В этом запросе c и o — это алиасы таблиц (псевдонимы). Они задаются сразу после имени таблицы в FROM и JOIN:
-```sql
-FROM customers c
-JOIN orders o ON c.id = o.customer_id
-```
-Здесь:
-- customers c — таблица customers получает псевдоним c.
-- orders o — таблица orders получает псевдоним o.
-
-Дальше в запросе можно писать `c.name` вместо `customers.name`, а `o.id` вместо `orders.id`. Это короче, удобнее и помогает, когда в разных таблицах есть столбцы с одинаковыми именами (например, `id` есть и в `customers`, и в `orders`).
+Алиасы c и o — см. раздел 7.1.
 
 ### 6.3. Фильтрация групп HAVING
 ```sql
@@ -415,6 +423,7 @@ HAVING SUM(amount) > 2000;
 
 ---
 
+<a id="join"></a>
 ## 🔗 Шаг 7: Соединения JOIN
 
 ### 7.1. INNER JOIN — только совпадающие строки
@@ -423,7 +432,11 @@ SELECT c.name, o.order_date, o.amount, o.status
 FROM customers c
 INNER JOIN orders o ON c.id = o.customer_id;
 ```
-Подробней о JOIN вообще и INNER JOIN (внутреннее соединение) в частности
+INNER JOIN и просто JOIN — это одно и то же. Слово INNER можно опускать.
+
+Чтобы узнать имя клиента по его id, нужно соединить таблицы через JOIN
+
+**JOIN** — это оператор, который соединяет строки из двух или более таблиц на основе общего столбца (обычно это первичный ключ одной таблицы и внешний ключ другой). Без JOIN работать с реляционными базами данных практически невозможно: данные намеренно разнесены по таблицам, чтобы избежать дублирования
 
 ### 7.2. LEFT JOIN — все клиенты, даже без заказов
 ```sql
@@ -431,6 +444,7 @@ SELECT c.name, o.id AS order_id, o.amount
 FROM customers c
 LEFT JOIN orders o ON c.id = o.customer_id;
 ```
+**LEFT JOIN** (левое внешнее соединение) — возвращает все строки из левой таблицы, даже если нет совпадений в правой. Для несовпавших строк правая таблица даёт NULL.
 
 Клиенты без заказов будут иметь `NULL` в полях заказа.
 
@@ -440,11 +454,150 @@ SELECT c.name, o.id AS order_id
 FROM customers c
 RIGHT JOIN orders o ON c.id = o.customer_id;
 ```
-что за c.* ?
+RIGHT JOIN (правое внешнее соединение) — возвращает все строки из правой таблицы, даже если нет совпадений в левой.
+
+Результат: все строки из правой таблицы (orders) + совпадения из левой (customers). Если у заказа нет клиента — в поле c.name будет NULL.
+
+На практике: RIGHT JOIN используется редко. Почти всегда его можно переписать как LEFT JOIN, поменяв таблицы местами:
+```sql
+-- Эквивалент RIGHT JOIN
+SELECT c.name, o.id AS order_id
+FROM orders o
+LEFT JOIN customers c ON o.customer_id = c.id;
+```
+
+### 7.4. JOIN и GROUP BY — соединение с агрегацией
+
+Соединим таблицы и посчитаем агрегаты:
+```sql
+SELECT c.name,
+       COUNT(o.id) AS order_count,
+       SUM(o.amount) AS total_amount
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id
+GROUP BY c.id, c.name
+ORDER BY total_amount DESC;
+```
+Чтобы вместо NULL был 0:
+```sql
+SELECT c.name,
+       COUNT(o.id) AS order_count,
+       COALESCE(SUM(o.amount), 0) AS total_amount
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id
+GROUP BY c.id, c.name
+ORDER BY total_amount DESC;
+```
 
 ---
 
-## ✏️ Шаг 8: Обновление данных (UPDATE)
+<a id="subqueries"></a>
+## 🧩 Шаг 8: Подзапросы и UNION
+
+### 8.1. Подзапросы (Subqueries)
+
+Подзапрос — это `SELECT`-запрос, вложенный внутрь другого SQL-запроса. Подзапрос выполняется первым, а его результат используется внешним запросом.
+
+#### Подзапрос в WHERE (с IN)
+```sql
+SELECT name, city
+FROM customers
+WHERE id IN (
+    SELECT customer_id
+    FROM orders
+    WHERE amount > 1000
+);
+```
+Вернёт клиентов, у которых есть хотя бы один заказ на сумму больше 1000.
+
+#### Подзапрос в WHERE (со сравнением)
+```sql
+SELECT name, city
+FROM customers
+WHERE id = (
+    SELECT customer_id
+    FROM orders
+    ORDER BY amount DESC
+    LIMIT 1
+);
+```
+Вернёт клиента с самым крупным заказом.
+
+#### Подзапрос в FROM (производная таблица)
+```sql
+SELECT c.name, o.total
+FROM customers c
+JOIN (
+    SELECT customer_id, SUM(amount) AS total
+    FROM orders
+    GROUP BY customer_id
+) o ON c.id = o.customer_id
+WHERE o.total > 2000;
+```
+Подзапрос в `FROM` формирует временную таблицу с агрегатами, которую затем соединяем с `customers`.
+
+#### Подзапрос в SELECT (скалярный)
+```sql
+SELECT c.name,
+       (SELECT COUNT(*) FROM orders o WHERE o.customer_id = c.id) AS order_count
+FROM customers c;
+```
+Для каждого клиента считается количество его заказов.
+
+#### EXISTS и NOT EXISTS
+```sql
+-- Клиенты, у которых есть хотя бы один заказ
+SELECT name FROM customers c
+WHERE EXISTS (
+    SELECT 1 FROM orders o WHERE o.customer_id = c.id
+);
+
+-- Клиенты без заказов
+SELECT name FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1 FROM orders o WHERE o.customer_id = c.id
+);
+```
+`EXISTS` часто работает быстрее, чем `IN`, особенно если внешняя таблица большая, а внутренняя — маленькая.
+
+### 8.2. UNION и UNION ALL
+
+`UNION` объединяет результаты двух `SELECT`-запросов в один набор строк.
+
+#### UNION (удаляет дубликаты)
+```sql
+SELECT name, city FROM customers WHERE city = 'Москва'
+UNION
+SELECT name, city FROM customers WHERE city = 'Казань';
+```
+Вернёт клиентов из Москвы и Казани, при этом дубликаты строк удаляются.
+
+#### UNION ALL (сохраняет дубликаты, работает быстрее)
+```sql
+SELECT city FROM customers
+UNION ALL
+SELECT city FROM customers;
+```
+Вернёт все города, включая повторы.
+
+#### Требования к UNION
+- Одинаковое количество столбцов в обоих запросах.
+- Совместимые типы данных.
+- Имена столбцов берутся из первого запроса.
+
+### 8.3. Сравнение JOIN и подзапросов
+
+| Критерий | JOIN | Подзапрос |
+|----------|------|-----------|
+| Читабельность | Лучше для соединения данных | Лучше для фильтрации |
+| Производительность | Обычно быстрее | Может быть медленнее |
+| Когда использовать | Нужны данные из обеих таблиц | Нужна только фильтрация |
+| EXISTS | — | Часто быстрее, чем `IN` |
+
+---
+
+<a id="alter"></a>
+## ✏️ Шаг 9: Обновление данных (UPDATE)
 
 ```sql
 UPDATE customers SET city = 'Екатеринбург' WHERE id = 4;
@@ -462,7 +615,7 @@ SELECT * FROM orders WHERE id = 3;
 
 ---
 
-## 🗑️ Шаг 9: Удаление данных (DELETE)
+## 🗑️ Шаг 10: Удаление данных (DELETE)
 
 ```sql
 DELETE FROM orders WHERE id = 6;
@@ -478,7 +631,7 @@ SELECT * FROM orders;
 
 ---
 
-## 🏗️ Шаг 10: Изменение структуры (ALTER TABLE)
+## 🏗️ Шаг 11: Изменение структуры (ALTER TABLE)
 
 ### Добавить столбец
 ```sql
@@ -493,7 +646,6 @@ UPDATE customers SET phone = '123' WHERE id = 4;
 SELECT * FROM customers WHERE id = 4;
 ```
 
-
 ### Изменить тип столбца
 ```sql
 ALTER TABLE customers MODIFY COLUMN phone VARCHAR(30);
@@ -506,7 +658,8 @@ ALTER TABLE customers DROP COLUMN phone;
 
 ---
 
-## 🧨 Шаг 11: Удаление таблиц и базы
+<a id="drop"></a>
+## 🧨 Шаг 12: Удаление таблиц и базы
 
 ```sql
 DROP TABLE orders;
@@ -536,23 +689,16 @@ SHOW DATABASES;
 
 ---
 
+<a id="next"></a>
 ## 📝 Что дальше?
 
 Когда освоите эти основы, можно переходить к:
-- **Подзапросам** (`SELECT ... WHERE id IN (SELECT ...)`)
-- **UNION** — объединение результатов
 - **Представлениям** (`CREATE VIEW`)
 - **Индексам** (`CREATE INDEX`)
 - **Транзакциям** (`START TRANSACTION`, `COMMIT`, `ROLLBACK`)
 - **Хранимым процедурам и триггерам**
+- **Оконным функциям** (`ROW_NUMBER()`, `RANK()`, `OVER`)
 
 ---
 
-## 🎯 Итог
-
-Теперь у вас есть рабочий полигон для практики SQL. Экспериментируйте: создавайте свои таблицы, вставляйте данные, пробуйте разные запросы. Главное — не бойтесь ошибаться: база учебная, её всегда можно пересоздать.
-
-Если захотите разобрать какую-то тему подробнее (например, JOIN или подзапросы) — просто скажите!
-
-
-> Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
+> Если вы обнаружили ошибку в этом тексте — сообщите пожалуйста автору!
