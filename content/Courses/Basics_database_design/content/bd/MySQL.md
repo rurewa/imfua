@@ -1,0 +1,536 @@
+## Интерактивная работа с MySQL в изолированном окружении Docker.
+
+- запустить «чистый» контейнер
+- подключиться к нему
+- выполнять основные операции с базами данных
+
+### 🚀 Шаг 1: Запуск контейнера MySQL
+
+- Создайте отдельный каталог `my-mysql` и перейдите в него.
+- Создайте в каталоге `my-mysql` файл `my.cnf` с содержимым:
+```shell
+[mysqld]
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+[client]
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4
+```
+Контейнер с официального образа MySQL:
+```bash
+docker run --name my-mysql \
+  -e MYSQL_ROOT_PASSWORD=123 \
+  -e LANG=C.UTF-8 \
+  -v mysql_data:/var/lib/mysql \
+  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
+  -d mysql:latest
+```
+
+Разберем, что делает эта команда:
+*   `--name my-mysql`: Присваивает контейнеру понятное имя `my-mysql`, чтобы не использовать его ID.
+*   `-e MYSQL_ROOT_PASSWORD=123`: Устанавливает пароль для пользователя root. В учебном примере — 123, в реальных проектах используйте надёжный пароль **Обязательно замените `123` на свой надежный пароль!**
+*   `-d`: Запускает контейнер в фоновом режиме (detached mode).
+*   `mysql:latest`: Указывает, что нужно использовать последнюю версию официального образа MySQL.
+
+Чтобы убедиться, что контейнер успешно запущен, выполните:
+```bash
+docker ps
+```
+Вы должны увидеть свой контейнер `my-mysql` в списке работающих.
+
+### 🔌 Шаг 2: Подключение к MySQL в интерактивном режиме
+
+Теперь, когда контейнер работает, к нему нужно подключиться. Для этого используется команда `docker exec`, которая позволяет выполнить команду внутри работающего контейнера.
+
+Выполните следующую команду, чтобы открыть интерактивную оболочку MySQL:
+
+```bash
+docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
+```
+*   `-it`: Флаги `-i` (interactive) и `-t` (tty) вместе создают интерактивный терминал.
+*   `mysql -uroot -p`: Запускает клиент MySQL от имени пользователя `root` и запрашивает пароль.
+
+После ввода пароля вы увидите приглашение `mysql>`. Теперь вы находитесь в интерактивной оболочке и можете выполнять любые SQL-команды.
+
+### 🛠️ Шаг 3: Основные операции с базами данных и таблицами
+
+Внутри оболочки MySQL вы можете выполнять все стандартные SQL-команды.
+
+Проверить кодировку сразу после подключения:
+```sql
+SHOW VARIABLES LIKE 'character_set%';
+```
+Если `character_set_client`, `character_set_connection` и `character_set_results` равны `utf8mb4` — всё в порядке.
+
+**1. Просмотр существующих баз данных**
+```sql
+SHOW DATABASES;
+```
+Эта команда покажет список всех баз данных, включая системные (`information_schema`, `mysql`, `performance_schema`, `sys`).
+
+**2. Создание новой базы данных и таблицы в ней**
+
+Создадим базу данных с именем `my_database` с таблицей `users`. Рекомендуется сразу указывать кодировку:
+```sql
+CREATE DATABASE my_database
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+USE my_database;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+INSERT INTO users (name, email) VALUES
+  ('Иван Иванов', 'ivan@example.com'),
+  ('Пётр Петров', 'petr@example.com'),
+  ('Мария Сидорова', 'maria@example.com');
+
+SELECT * FROM users;
+```
+
+**3. Выбор базы данных для работы**
+```sql
+USE my_database;
+```
+Теперь все последующие команды будут применяться к этой базе данных.
+
+Получить существующие таблицы
+```sql
+SHOW TABLES;
+```
+
+**4. Вставка данных**
+```sql
+INSERT INTO users (name, email) VALUES ('Павел Иванов', 'pavel@example.com');
+INSERT INTO users (name, email) VALUES ('Марк Аврелий', 'mark@example.com');
+```
+Проверка кодировки после вставки (зачем?):
+```sql
+SELECT name, HEX(name) FROM users WHERE id = 1;
+```
+
+**5. Просмотр данных**
+```sql
+SELECT * FROM users;
+```
+
+**6. Обновление данных**
+```sql
+UPDATE users SET name = 'Иван Петров' WHERE id = 1;
+```
+или
+```sql
+UPDATE users SET name = 'Vasya' WHERE id = 1;
+```
+
+Посмотреть все строки таблицы
+```sql
+SELECT * FROM users;
+```
+Посмотреть одну конкретную строку
+```sql
+SELECT * FROM users WHERE id = 1;
+```
+Посмотреть только нужные столбцы
+```sql
+SELECT name, email FROM users WHERE id = 1;
+```
+Удобный вертикальный вывод
+```sql
+SELECT * FROM users WHERE id = 1\G
+```
+`\G` заменяет точку с запятой и не требует `;` в конце
+
+**7. Удаление данных**
+```sql
+DELETE FROM users WHERE id = 2;
+```
+Если удалить `WHERE`, удалятся все строки
+
+**8. Удаление таблицы**
+```sql
+DROP TABLE users;
+```
+Получить существующие таблицы
+```sql
+SHOW TABLES;
+```
+
+**9. Удаление базы данных**
+```sql
+DROP DATABASE my_database;
+```
+Просмотр существующих баз данных**
+```sql
+SHOW DATABASES;
+```
+
+### 🧹 Шаг 4: Управление контейнером
+
+*   **Остановка контейнера:**
+    ```bash
+    docker stop my-mysql
+    ```
+*   **Запуск ранее остановленного контейнера:**
+    ```bash
+    docker start my-mysql
+    ```
+*   **Просмотр логов (может пригодиться для отладки):**
+    ```bash
+    docker logs my-mysql
+    ```
+*   **Полное удаление контейнера (вместе с volume, если он не нужен):**
+    ```bash
+    docker rm -v my-mysql
+    ```
+    Флаг `-v` также удалит связанный с контейнером volume. **Будьте осторожны: это приведет к безвозвратной потере данных.**
+
+Если нужно пересоздать контейнер с сохранением данных:
+```shell
+docker stop my-mysql
+docker rm my-mysql
+docker run --name my-mysql \
+  -e MYSQL_ROOT_PASSWORD=123 \
+  -e LANG=C.UTF-8 \
+  -v mysql_data:/var/lib/mysql \
+  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
+  -d mysql:latest
+```
+
+***
+
+## Практическое руководство по основам SQL
+
+---
+
+## 🔌 Подключение к контейнеру
+
+Если контейнер ещё не запущен, запустите его:
+
+```bash
+docker start my-mysql
+```
+
+Подключитесь к MySQL:
+
+```bash
+docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
+```
+
+Введите пароль `123`. Вы увидите приглашение `mysql>`.
+
+---
+
+## 🗄️ Шаг 1: Создание учебной базы данных
+
+```sql
+CREATE DATABASE sql_practice
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE sql_practice;
+```
+
+Проверить, что база создана:
+
+```sql
+SHOW DATABASES;
+```
+
+---
+
+## 📋 Шаг 2: Создание таблиц
+
+Создадим две связанные таблицы: `customers` (клиенты) и `orders` (заказы).
+
+```sql
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    city VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    order_date DATE NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(20) DEFAULT 'new',
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+Получить существующие таблицы
+```sql
+SHOW TABLES;
+```
+Проверить структуру таблицы:
+```sql
+DESCRIBE customers;
+DESCRIBE orders;
+```
+
+---
+
+## ✍️ Шаг 3: Вставка данных (INSERT)
+
+```sql
+INSERT INTO customers (name, email, city) VALUES
+  ('Иван Иванов', 'ivan@example.com', 'Москва'),
+  ('Пётр Петров', 'petr@example.com', 'Санкт-Петербург'),
+  ('Мария Сидорова', 'maria@example.com', 'Москва'),
+  ('Алексей Смирнов', 'alex@example.com', 'Казань'),
+  ('Ольга Кузнецова', 'olga@example.com', 'Новосибирск');
+
+INSERT INTO orders (customer_id, order_date, amount, status) VALUES
+  (1, '2026-10-01', 1500.00, 'paid'),
+  (1, '2026-10-05', 2300.50, 'paid'),
+  (2, '2026-10-03', 800.00, 'new'),
+  (3, '2026-10-07', 4200.00, 'paid'),
+  (3, '2026-10-10', 1100.00, 'cancelled'),
+  (4, '2026-10-12', 950.00, 'new');
+```
+`customers` - клиенты, `paid` - оплачено
+
+Проверить, что данные вставились:
+```sql
+SELECT * FROM customers;
+SELECT * FROM orders;
+```
+
+---
+
+## 🔍 Шаг 4: Выборка данных (SELECT)
+
+### 4.1. Все столбцы и все строки
+```sql
+SELECT * FROM customers;
+```
+
+### 4.2. Только нужные столбцы
+```sql
+SELECT name, city FROM customers;
+```
+
+### 4.3. Условие WHERE
+```sql
+SELECT * FROM customers WHERE city = 'Москва';
+SELECT * FROM orders WHERE amount > 1000;
+SELECT * FROM orders WHERE status = 'paid' AND amount > 1500;
+SELECT * FROM orders WHERE status = 'new' OR status = 'cancelled';
+```
+`amount` - сумма
+
+### 4.4. Сортировка ORDER BY
+```sql
+SELECT * FROM customers ORDER BY name;
+SELECT * FROM orders ORDER BY amount DESC;
+SELECT * FROM orders ORDER BY order_date DESC, amount ASC;
+```
+`SELECT FROM orders ORDER BY` - выбрать из заказов по сумме
+
+### 4.5. Ограничение количества строк LIMIT
+```sql
+SELECT * FROM orders ORDER BY amount DESC LIMIT 3;
+```
+
+### 4.6. Поиск по шаблону LIKE
+```sql
+SELECT * FROM customers WHERE name LIKE 'И%';      -- начинается на И
+SELECT * FROM customers WHERE email LIKE '%@example.com';
+```
+
+### 4.7. Диапазон BETWEEN, список IN
+```sql
+SELECT * FROM orders WHERE amount BETWEEN 1000 AND 3000;
+SELECT * FROM customers WHERE city IN ('Москва', 'Казань');
+```
+Подробней про IN
+
+### 4.8. Пустые значения IS NULL
+```sql
+SELECT * FROM customers WHERE city IS NULL;
+```
+
+---
+
+## 📊 Шаг 5: Агрегатные функции
+
+Всего заказов
+```sql
+SELECT COUNT(*) AS total_orders FROM orders;
+```
+Общая сумма
+```sql
+SELECT SUM(amount) AS total_sum FROM orders;
+```
+Среднее
+```sql
+SELECT AVG(amount) AS avg_amount FROM orders;
+```
+Минимальная и максимальная сумма
+```sql
+SELECT MIN(amount) AS min_amount, MAX(amount) AS max_amount FROM orders;
+```
+
+---
+
+## 📈 Шаг 6: Группировка GROUP BY и HAVING
+
+### 6.1. Количество заказов по каждому клиенту
+```sql
+SELECT customer_id, COUNT(*) AS order_count, SUM(amount) AS total_amount
+FROM orders
+GROUP BY customer_id;
+```
+
+### 6.2. Соединение с именами клиентов
+```sql
+SELECT c.name, COUNT(o.id) AS order_count, SUM(o.amount) AS total_amount
+FROM customers c
+JOIN orders o ON c.id = o.customer_id
+GROUP BY c.id, c.name
+ORDER BY total_amount DESC;
+```
+
+### 6.3. Фильтрация групп HAVING
+```sql
+SELECT customer_id, SUM(amount) AS total_amount
+FROM orders
+GROUP BY customer_id
+HAVING SUM(amount) > 2000;
+```
+
+---
+
+## 🔗 Шаг 7: Соединения JOIN
+
+### 7.1. INNER JOIN — только совпадающие строки
+```sql
+SELECT c.name, o.order_date, o.amount, o.status
+FROM customers c
+INNER JOIN orders o ON c.id = o.customer_id;
+```
+
+### 7.2. LEFT JOIN — все клиенты, даже без заказов
+```sql
+SELECT c.name, o.id AS order_id, o.amount
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id;
+```
+
+Клиенты без заказов будут иметь `NULL` в полях заказа.
+
+### 7.3. RIGHT JOIN — все заказы, даже если клиент удалён (редко используется)
+```sql
+SELECT c.name, o.id AS order_id
+FROM customers c
+RIGHT JOIN orders o ON c.id = o.customer_id;
+```
+
+---
+
+## ✏️ Шаг 8: Обновление данных (UPDATE)
+
+```sql
+UPDATE customers SET city = 'Екатеринбург' WHERE id = 4;
+UPDATE orders SET status = 'paid' WHERE id = 3;
+```
+
+Проверить:
+
+```sql
+SELECT * FROM customers WHERE id = 4;
+SELECT * FROM orders WHERE id = 3;
+```
+
+⚠️ **Важно:** всегда указывайте `WHERE`, иначе обновятся все строки.
+
+---
+
+## 🗑️ Шаг 9: Удаление данных (DELETE)
+
+```sql
+DELETE FROM orders WHERE id = 6;
+```
+
+Проверить:
+
+```sql
+SELECT * FROM orders;
+```
+
+⚠️ Без `WHERE` удалятся все строки: `DELETE FROM orders;`
+
+---
+
+## 🏗️ Шаг 10: Изменение структуры (ALTER TABLE)
+
+### Добавить столбец
+```sql
+ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
+```
+
+### Изменить тип столбца
+```sql
+ALTER TABLE customers MODIFY COLUMN phone VARCHAR(30);
+```
+
+### Удалить столбец
+```sql
+ALTER TABLE customers DROP COLUMN phone;
+```
+
+---
+
+## 🧨 Шаг 11: Удаление таблиц и базы
+
+```sql
+DROP TABLE orders;
+DROP TABLE customers;
+DROP DATABASE sql_practice;
+```
+
+---
+
+## 🧰 Полезные команды
+
+| Команда | Что делает |
+|---------|------------|
+| `SHOW DATABASES;` | Список баз данных |
+| `USE имя_базы;` | Переключиться на базу |
+| `SHOW TABLES;` | Список таблиц в текущей базе |
+| `DESCRIBE имя_таблицы;` | Структура таблицы |
+| `SHOW CREATE TABLE имя_таблицы;` | SQL для создания таблицы |
+| `EXIT;` или `\q` | Выйти из MySQL |
+| `\G` вместо `;` | Вертикальный вывод строки |
+
+---
+
+## 📝 Что дальше?
+
+Когда освоите эти основы, можно переходить к:
+- **Подзапросам** (`SELECT ... WHERE id IN (SELECT ...)`)
+- **UNION** — объединение результатов
+- **Представлениям** (`CREATE VIEW`)
+- **Индексам** (`CREATE INDEX`)
+- **Транзакциям** (`START TRANSACTION`, `COMMIT`, `ROLLBACK`)
+- **Хранимым процедурам и триггерам**
+
+---
+
+## 🎯 Итог
+
+Теперь у вас есть рабочий полигон для практики SQL. Экспериментируйте: создавайте свои таблицы, вставляйте данные, пробуйте разные запросы. Главное — не бойтесь ошибаться: база учебная, её всегда можно пересоздать.
+
+Если захотите разобрать какую-то тему подробнее (например, JOIN или подзапросы) — просто скажите!
+
+
+> Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
