@@ -350,6 +350,14 @@ git merge anybranch
 
 [A collection of .gitignore templates](https://github.com/github/gitignore)
 
+Если папка build уже была добавлена в Git раньше, .gitignore на неё не подействует. Нужно сначала убрать её из индекса:
+```shell
+git rm -r --cached build/
+```
+```shell
+git commit -m "chore: remove build directory from tracking"
+```
+
 ### Дополнительная информация
 
 - [Pull Request](/content/Git/Pull_Request.md)
@@ -372,5 +380,6 @@ git merge anybranch
 ![Какой-то текст](/content/Git/img/4.jpg)
 
 ![Logo](/content/Git/img/67.jpeg)
+
 
 > Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
