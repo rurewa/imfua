@@ -3,6 +3,7 @@
 ## Навигация по предмету
 
 Теория
+- [Вводная лекция по БД](/content/Courses/Basics_database_design/content/Begin.md)
 - [Классификация Баз Данных](/content/Courses/Basics_database_design/content/All_db.md)
 - [ER-диаграмы](/content/Courses/Basics_database_design/content/ER_dia.md)
 
