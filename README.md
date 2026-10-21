@@ -74,7 +74,7 @@
     brew install micro
     ```
 1. Регистрация в [Яндекс](https://ya.ru/) или [VK](https://vk.com/) - для регистрации на [Gitflic.ru](gitflic.ru)
-1. Создать публичный репозиторий с `README.md` на [gitflic.ru](gitflic.ru) или [Github](github.com)
+1. Создать публичный репозиторий с `README.md` на [gitflic.ru](gitflic.ru) или [Github](github.com) (для **GitHub** может понадобиться VPN)
 1. **Dia** [Dia](https://ru.wikipedia.org/wiki/Dia) - `winget install gnome.Dia` (опционально)
 1. **VSCode** [VSCode](https://code.visualstudio.com/) или в **PowerShell** - `winget install Microsoft.VisualStudioCode` или `winget install --id Microsoft.VisualStudioCode -e --source winget`
 1. [Zed](https://zed.dev/?ref=taaft) - опционально - это высокопроизводительный, многопользовательский редактор кода с открытым исходным кодом со встроенным ИИ.
