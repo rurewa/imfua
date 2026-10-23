@@ -23,13 +23,6 @@ flowchart TD
 
     style A fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
 ```
-```mermaid
-flowchart LR
-    A["Модели данных"] --> B["Реляционные"]
-    A --> C["Нереляционные (NoSQL)"]
-    A --> D["Объектно-ориентированные (OODB)"]
-    A --> E["Объектно-реляционные (ORDBMS)"]
-```
 
 ### 🔹 Реляционные (RDBMS)
 
