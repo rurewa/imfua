@@ -55,6 +55,24 @@ docker ps
 ```
 Вы должны увидеть свой контейнер `my-mysql` в списке работающих.
 
+Где "физически" зранятся файлы новой базы данных?
+
+Увидеть физические файлы базы в вашем Docker-контейнере:
+```shell
+docker exec -it my-mysql ls -la /var/lib/mysql
+```
+Вы увидите примерно такую картину:
+```shell
+drwxr-xr-x  mysql mysql  ibdata1
+drwxr-xr-x  mysql mysql  ib_logfile0
+drwxr-xr-x  mysql mysql  ib_logfile1
+drwxr-xr-x  mysql mysql  #innodb_temp
+drwxr-xr-x  mysql mysql  mysql/
+drwxr-xr-x  mysql mysql  performance_schema/
+drwxr-xr-x  mysql mysql  sys/
+drwxr-xr-x  mysql mysql  sql_practice/
+```
+
 ### 🔌 Шаг 2: Подключение к MySQL в интерактивном режиме
 
 Теперь, когда контейнер работает, к нему нужно подключиться. Для этого используется команда `docker exec`, которая позволяет выполнить команду внутри работающего контейнера.
@@ -107,12 +125,18 @@ INSERT INTO users (name, email) VALUES
 
 SELECT * FROM users;
 ```
+Это инструкции, которые указывают СУБД: «создай базу», «создай таблицу», «вставь строку»
+
+Получить существующие БД
+```sql
+SHOW DATABASES;
+```
 
 **3. Выбор базы данных для работы**
 ```sql
 USE my_database;
 ```
-Теперь все последующие команды будут применяться к этой базе данных.
+Теперь все последующие команды будут применяться к этой базе данных!
 
 Получить существующие таблицы
 ```sql
@@ -120,11 +144,17 @@ SHOW TABLES;
 ```
 
 **4. Вставка данных**
+
+Сначала получим текущие данные указанной таблицы
+```sql
+SELECT * FROM users;
+```
+затем добавим новые:
 ```sql
 INSERT INTO users (name, email) VALUES ('Павел Иванов', 'pavel@example.com');
 INSERT INTO users (name, email) VALUES ('Марк Аврелий', 'mark@example.com');
 ```
-Проверка кодировки после вставки:
+Проверка кодировки после вставки (опционально):
 ```sql
 SELECT name, HEX(name) FROM users WHERE id = 1;
 ```
@@ -138,6 +168,8 @@ SELECT * FROM users;
 ```sql
 UPDATE users SET name = 'Иван Петров' WHERE id = 1;
 ```
+просто меняем id в указанной записи
+
 или
 ```sql
 UPDATE users SET name = 'Vasya' WHERE id = 1;
@@ -146,21 +178,27 @@ UPDATE users SET name = 'Vasya' WHERE id = 1;
 ```sql
 SELECT * FROM users;
 ```
-Посмотреть одну конкретную строку
+Посмотреть одну конкретную запись (строку)
 ```sql
 SELECT * FROM users WHERE id = 1;
 ```
-Посмотреть только нужные столбцы
+Посмотреть только нужные поля (столбцы)
 ```sql
 SELECT name, email FROM users WHERE id = 1;
 ```
-Удобный вертикальный вывод
+Удобный вертикальный выводDROP TABLE users;
 ```sql
 SELECT * FROM users WHERE id = 1\G
 ```
 `\G` заменяет точку с запятой и не требует `;` в конце
 
 **7. Удаление данных**
+
+Сначала получим содержимое таблицы для последующего сравнения
+```sql
+SELECT * FROM users;
+```
+затем удалим указанную запись
 ```sql
 DELETE FROM users WHERE id = 2;
 ```
@@ -282,6 +320,19 @@ SHOW TABLES;
 ```sql
 DESCRIBE customers;
 DESCRIBE orders;
+```
+Команда `CREATE TABLE customers` Создаёт файл customers.ibd и т.п.
+```sql
+exit
+```
+Внутри каталога sql_practice/ можно увидеть файлы
+```shell
+docker exec -it my-mysql ls -la /var/lib/mysql/sql_practice
+```
+Вы увидите:
+```shell
+customers.ibd
+orders.ibd
 ```
 
 ---
@@ -612,6 +663,18 @@ SELECT * FROM orders WHERE id = 3;
 ```
 
 ⚠️ **Важно:** всегда указывайте `WHERE`, иначе обновятся все строки!
+
+Создание дампа БД (Экспорт в .sql файл)
+
+Делаем дапи:
+```shell
+docker exec my-mysql mysqldump -uroot -p123 sql_practice > dump.sql
+```
+после чего в папке `my-mysql` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой
+```shell
+cat dump.sql
+```
+.sql файл является текстовым представлением вашей БД (текстовый SQL-скрипт). Его можно хранить как резервную копия вашей БД, из которой потом её можно восстановить
 
 ---
 

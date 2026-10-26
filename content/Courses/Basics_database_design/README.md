@@ -13,7 +13,7 @@
 - [](/content/Courses/Basics_database_design/content/Docs/JOIN.md)
 - [](/content/Courses/Basics_database_design/content/Docs/set_theory.md)
 - [](/content/Courses/Basics_database_design/content/Docs/tuple.md)
-- []()
+- [](/content/Courses/Basics_database_design/content/Docs/SQL_File.md)
 - []()
 
 Практика
