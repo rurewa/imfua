@@ -712,6 +712,10 @@ SELECT * FROM orders WHERE id = 3;
 ```shell
 docker exec my-mysql mysqldump -uroot -p123 sql_practice > dump.sql
 ```
+или
+```sql
+docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot sql_practice > dump.sql
+```
 после чего в папке `my-mysql` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой
 ```shell
 cat dump.sql
