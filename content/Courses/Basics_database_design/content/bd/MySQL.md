@@ -528,6 +528,33 @@ INNER JOIN orders o ON c.id = o.customer_id;
 
 **JOIN** — это оператор, который соединяет строки из двух или более таблиц на основе общего столбца (обычно это первичный ключ одной таблицы и внешний ключ другой). Без JOIN работать с реляционными базами данных практически невозможно: данные намеренно разнесены по таблицам, чтобы избежать дублирования
 
+Алиасы в SQL
+```sql
+FROM customers c
+JOIN orders o ON c.id = o.customer_id
+```
+Здесь:
+- `customers c` — таблица **customers** получает псевдоним `c`
+- `orders o` — таблица **orders** получает псевдоним `o`
+
+Зачем нужны?
+
+1. Краткость. Вместо `customers.name` пишете `c.name`. В коротком запросе это мелочь, но в запросе с 5 таблицами — существенная экономия.
+2. Разрешение неоднозначности. В обеих таблицах есть столбец `id`. Без алиаса запрос:
+```sql
+SELECT id FROM customers JOIN orders ON ...;
+```
+вернёт ошибку:
+```sql
+ERROR 1052 (23000): Column 'id' in field list is ambiguous
+```
+т.к. MySQL не знает, какой `id` имеется в виду — из `customers` или из `orders`. С алиасом всё однозначно:
+```sql
+SELECT c.id, o.id FROM customers c JOIN orders o ON c.id = o.customer_id;
+```
+[Подробней про алиасы в SQL тут >>>]()
+
+
 ### 7.2. LEFT JOIN — все клиенты, даже без заказов
 ```sql
 SELECT c.name, o.id AS order_id, o.amount
@@ -713,7 +740,7 @@ SELECT * FROM orders WHERE id = 3;
 docker exec my-mysql mysqldump -uroot -p123 sql_practice > dump.sql
 ```
 или
-```sql
+```shell
 docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot sql_practice > dump.sql
 ```
 после чего в папке `my-mysql` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой
