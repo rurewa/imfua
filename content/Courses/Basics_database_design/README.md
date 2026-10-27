@@ -14,6 +14,7 @@
 - [Теория множеств и базы данных](/content/Courses/Basics_database_design/content/Docs/set_theory.md)
 - [Понятие кортежа в БД](/content/Courses/Basics_database_design/content/Docs/tuple.md)
 - [Файлы БД](/content/Courses/Basics_database_design/content/Docs/SQL_File.md)
+- []()
 
 
 ### Практика
@@ -23,6 +24,8 @@
   - [Работа с базой данных внутри контейнера](/content/Basics_database_design/db_base.md)
 - Базы Данных
   - [Интерактивная работа с MySQL в изолированном окружении Docker](/content/Courses/Basics_database_design/content/Content/MySQL.md)
+  - [Основные операции на примере двух таблиц «products 1» и «products 2»](/content/Courses/Basics_database_design/content/bd/Products.md)
+  - [Руководство по представлениям (VIEW) в MySQL](/content/Courses/Basics_database_design/content/bd/VIEW_MySQL.md)
 
 
 ---
