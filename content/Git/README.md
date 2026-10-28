@@ -381,6 +381,27 @@ git push --delete origin v0.0.1
 git push --delete origin v0.1.0
 git push --delete origin v0.1.1
 ```
+Создайть тег, например для нового релиза
+
+Подготовим изменения
+```shell
+git add .
+```
+Добавим коммит
+```shell
+git commit -m "feat: adaptive theme support"
+```
+Запушить
+```shell
+git push
+```
+```shell
+git tag v0.1.0
+```
+Запушить
+```shell
+git push origin v0.1.0
+```
 
 ### Дополнительная информация
 
