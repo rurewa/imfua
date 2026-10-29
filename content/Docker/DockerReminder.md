@@ -79,6 +79,7 @@ docker volume prune -a
 ```shell
 docker image prune -a
 ```
+Удаление всех остановленных контейнеров
 ```shell
 docker container prune
 ```
