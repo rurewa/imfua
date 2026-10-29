@@ -421,13 +421,17 @@ curl parrot.live
 ```shell
 curl ascii.live/forrest
 ```
-Поющиё человек
+Поющий человек
 ```shell
 curl ascii.live/can-you-hear-me
 ```
 Аквариум
 ```shell
 snap install asciiquarium && asciiquarium
+```
+или
+```shell
+docker run -it --rm macabees/asciiquarium
 ```
 Выйти из аквариума по '**Q**'
 
@@ -441,9 +445,19 @@ docker run --rm -it bcbcarl/hollywood
 ```shell
 nyancat
 ```
+Дум
+```shell
+docker run --rm -it --shm-size=512m -p 6901:6901 -e VNC_PW=password kasmweb/doom:1.19.0
+```
+[После установки открыть в браузере этот адрес](https://localhost:6901/)
+
+Логин: `kasm_user`
+Пароль: `password`
 
 ***
 
 ### Ресурсы
 
 - [Linux Cheat Sheet — шпаргалка по командам Linux](https://github.com/justxor/Linux-/)
+
+> Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
