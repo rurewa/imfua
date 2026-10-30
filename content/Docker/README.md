@@ -7,7 +7,7 @@
 - [Готовые образы (Docker CLI)](/content/Docker/ImageLibrary/README.md)
 - [Dockerfile](/content/Docker/Dockerfile/README.md)
 - [Docker Compose](/content/Docker/DockerCompose/README.md)
-- []()
+- [Различные ошибки работы Docker](/content/Docker/Docs/Errors.md)
 - []()
 
 ### Видео
