@@ -12,6 +12,7 @@
 - Предметы:
     - [Инструментальные средства разработки ПО](/content/Courses/SoftwareDevelopmentTools/)
     - [Информационные технологии](/content/Courses/IT/)
+    - [Информационные системы и технологии](/content/Courses/IT_systems/README.md)
     - [Основы проектирования баз данных](/content/Courses/Basics_database_design/)
     - [Обеспечение качества функционирования компьютерных систем](/content//Courses/Ensuring_quality_computer_systems_functioning/)
     - [Поддержка и тестирование программных модулей](/content/Courses/SupportAndTesting_of_software_modules/)
@@ -309,6 +310,7 @@ code .
 * [Вопросы к экзамену по дисциплине «ОБЕСПЕЧЕНИЕ КАЧЕСТВА ФУНКЦИОНИРОВАНИЯ КОМПЬЮТЕРНЫХ СИСТЕМ»](/content/Courses/Ensuring_quality_computer_systems_functioning/questions.md)
 * [Вопросы к экзамену по дисциплине "Инструментальные средства разработки ПО"](/content/Courses/SoftwareDevelopmentTools/questions.md)
 * [Вопросы к экзамену по дисциплине "Информационные технологии"](/content/Courses/IT/questions.md)
+* [Вопросы к экзамену по дисциплине "Информационные системы и технологии"](/content/Courses/IT_systems/questions.md)
 * [Вопросы к экзамену по дисциплине "Операционные системы и среды"](/content/Courses/IT/questions.md)
 * [Вопросы к экзамену по дисциплине "Технология разработки и защиты БД"](/content/Courses/IT/questions.md)
 
