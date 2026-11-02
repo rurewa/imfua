@@ -1,6 +1,6 @@
 # Основные SQL-операции на примере двух таблиц «products 1» и «products 2»
 
-Все команды можно выполнить в любом клиенте **MySQL** (в том числе в вашем Docker-контейнере `my-mysql`). Для MySQL 8.0.31+ доступны операторы `EXCEPT` и `INTERSECT`; для более старых версий даны альтернативы.
+Все команды можно выполнить в любом клиенте **MySQL 8.0.31+** (в Docker-контейнере). Для MySQL 8.0.31+ доступны операторы `EXCEPT` и `INTERSECT`; для более старых версий даны альтернативы.
 
 ---
 
@@ -17,7 +17,7 @@ docker volume prune -a
 docker container prune
 ```
 - Создайте отдельный каталог `products-mysql` (`mkdir products-mysql`) и перейдите в него (`cd products-mysql`).
-- Создайте в каталоге `products-mysql` файл `my.cnf` с содержимым:
+- Создайте в каталоге `products-mysql` файл `my.cnf` (для корректного отображения кириллицы) с содержимым:
 ```shell
 [mysqld]
 character-set-server = utf8mb4
@@ -31,7 +31,7 @@ default-character-set = utf8mb4
 ```
 Контейнер с официального образа **MySQL**:
 ```bash
-docker run --name my-mysql \
+docker run --name products-mysql \
   -e MYSQL_ROOT_PASSWORD=123 \
   -e LANG=C.UTF-8 \
   -v mysql_data:/var/lib/mysql \
@@ -44,7 +44,7 @@ docker ps
 ```
 Войти в контейнер с БД
 ```bash
-docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
+docker exec -it products-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
 Создать новую БД
 ```sql
@@ -298,11 +298,11 @@ LEFT JOIN products2 t2 ON t1.name = t2.name;
 ```
 Делаем дамп:
 ```shell
-docker exec my-mysql mysqldump -uroot -p123 shop > dump.sql
+docker exec products-mysql mysqldump -uroot -p123 shop > dump.sql
 ```
 или
 ```shell
-docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot shop > dump.sql
+docker exec -e MYSQL_PWD=123 products-mysql mysqldump -uroot shop > dump.sql
 ```
 после чего в папке `products-mysql` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой
 ```shell
@@ -314,7 +314,7 @@ cat dump.sql
 
 Снова войтив в контейнер с БД
 ```shell
-docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
+docker exec -it products-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
 Проверить состояние и получить таблицы указанной БД
 ```sql
@@ -337,13 +337,12 @@ SHOW DATABASES;
 
 ## 🔹 Шаг 7. Восстановление БД из дампа
 
-Проверьте, что контейнер запущен
-
-Проверьте, что дамп на месте и не пуст
+- Проверьте, что контейнер запущен
+- Проверьте, что дамп на месте и не пуст
 
 зайти в контейнер
 ```shell
-docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
+docker exec -it products-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
 Проверить результат
 ```sql
@@ -365,11 +364,11 @@ SHOW DATABASES;
 ```
 Команда импорта выполняется не внутри mysql, а в обычном терминале хоста (с игнорированием ошибок импорта):
 ```shell
-docker exec -i my-mysql mysql -uroot -p123 --force shop < dump.sql
+docker exec -i products-mysql mysql -uroot -p123 --force shop < dump.sql
 ```
 Чтобы проверить результат, нужно снова зайти в контейнер с БД
 ```shell
-docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
+docker exec -it products-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
 И проверить содержимое восстановленной БД
 ```sql
@@ -379,6 +378,11 @@ SHOW TABLES;
 SELECT * FROM products1;
 SELECT * FROM products2;
 ```
+
+## 🔹 Шаг 7. Опубликовать БД в своём GitHub
+
+- Закоммитить и запушить дамп БД этого задания
+- Прислать ссылку преподавателю
 
 ---
 
