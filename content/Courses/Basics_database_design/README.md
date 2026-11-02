@@ -26,6 +26,7 @@
   - [Интерактивная работа с MySQL в изолированном окружении Docker](/content/Courses/Basics_database_design/content/Content/MySQL.md)
   - [Основные операции на примере двух таблиц «products 1» и «products 2»](/content/Courses/Basics_database_design/content/bd/Products.md)
   - [Руководство по представлениям (VIEW) в MySQL](/content/Courses/Basics_database_design/content/bd/VIEW_MySQL.md)
+  - [Нормализация данных: простое руководство с примерами](/content/Courses/Basics_database_design/content/Docs/data_normalization.md)
 
 
 ---
