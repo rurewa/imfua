@@ -24,6 +24,7 @@ docker container prune
 ```shell
 docker volume prune -a
 ```
+- [Шпаргалка по Docker](/content/Docker/DockerReminder.md)
 
 - Создайте отдельный каталог `products-mysql` (`mkdir products-mysql`) и перейдите в него (`cd products-mysql`).
 - Создайте в каталоге `products-mysql` файл `my.cnf` (для корректного отображения кириллицы) с содержимым:
@@ -85,7 +86,6 @@ CREATE TABLE products2 (
 ```
 Проверить результат
 ```sql
-SHOW DATABASES;
 SHOW TABLES;
 ```
 
@@ -226,13 +226,6 @@ SELECT name, price FROM products2;
 | Дыни | 800 |
 | Клубника | 150 |
 
-**Для старых версий MySQL:**
-```sql
-SELECT t1.name, t1.price
-FROM products1 t1
-JOIN products2 t2 ON t1.name = t2.name AND t1.price = t2.price;
-```
-
 ---
 
 ### 6. Декартово произведение (CARTESIAN PRODUCT)
@@ -307,10 +300,6 @@ LEFT JOIN products2 t2 ON t1.name = t2.name;
 ```
 Делаем дамп:
 ```shell
-docker exec products-mysql mysqldump -uroot -p123 shop > dump.sql
-```
-или
-```shell
 docker exec -e MYSQL_PWD=123 products-mysql mysqldump -uroot shop > dump.sql
 ```
 после чего в папке `products-mysql` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой
@@ -321,7 +310,7 @@ cat dump.sql
 
 ## 🔹 Шаг 6. Уборка
 
-Снова войтив в контейнер с БД
+Снова войти в контейнер с БД
 ```shell
 docker exec -it products-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
