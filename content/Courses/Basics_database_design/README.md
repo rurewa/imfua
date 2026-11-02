@@ -27,7 +27,7 @@
   - [Основные операции на примере двух таблиц «products 1» и «products 2»](/content/Courses/Basics_database_design/content/bd/Products.md)
   - [Руководство по представлениям (VIEW) в MySQL](/content/Courses/Basics_database_design/content/bd/VIEW_MySQL.md)
   - [Нормализация данных. Практическое руководство 1](/content/Courses/Basics_database_design/content/bd/Normalization_1.md)
-  - [Нормализация данных. Практическое руководство 2](/content/Courses/Basics_database_design/content/bd/Normalization_2.md)
+  - [Лабораторная работа по нормализации данных в БД](/content/Courses/Basics_database_design/content/bd/Normalization_2.md)
 
 
 ---
