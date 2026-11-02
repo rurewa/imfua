@@ -9,7 +9,23 @@
 4. Создайте четыре таблицы в 3NF.
 5. Повторите те же операции — убедитесь, что аномалии исчезли.
 
-docker exec -it products-mysql mysql --default-character-set=utf8mb4 -uroot -p
+Контейнер с официального образа **MySQL**:
+```bash
+docker run --name shop_norm \
+  -e MYSQL_ROOT_PASSWORD=123 \
+  -e LANG=C.UTF-8 \
+  -v mysql_data:/var/lib/mysql \
+  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
+  -d mysql:latest
+```
+Чтобы убедиться, что контейнер успешно запущен, выполните:
+```bash
+docker ps
+```
+Войтите в контейнер
+```sql
+docker exec -it shop_norm mysql --default-character-set=utf8mb4 -uroot -p
+```
 
 ### Шаг 1. Создание новой БД с ненормализованной таблицей
 
