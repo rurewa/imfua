@@ -14,7 +14,7 @@
 - [Теория множеств и базы данных](/content/Courses/Basics_database_design/content/Docs/set_theory.md)
 - [Понятие кортежа в БД](/content/Courses/Basics_database_design/content/Docs/tuple.md)
 - [Файлы БД](/content/Courses/Basics_database_design/content/Docs/SQL_File.md)
-- []()
+- [Нормализация данных: простое руководство с примерами](/content/Courses/Basics_database_design/content/Docs/data_normalization.md)
 
 
 ### Практика
@@ -26,7 +26,8 @@
   - [Интерактивная работа с MySQL в изолированном окружении Docker](/content/Courses/Basics_database_design/content/Content/MySQL.md)
   - [Основные операции на примере двух таблиц «products 1» и «products 2»](/content/Courses/Basics_database_design/content/bd/Products.md)
   - [Руководство по представлениям (VIEW) в MySQL](/content/Courses/Basics_database_design/content/bd/VIEW_MySQL.md)
-  - [Нормализация данных: простое руководство с примерами](/content/Courses/Basics_database_design/content/Docs/data_normalization.md)
+  - [Нормализация данных. Практическое руководство 1](/content/Courses/Basics_database_design/content/bd/Normalization_1.md)
+  - [Нормализация данных. Практическое руководство 2](/content/Courses/Basics_database_design/content/bd/Normalization_2.md)
 
 
 ---
