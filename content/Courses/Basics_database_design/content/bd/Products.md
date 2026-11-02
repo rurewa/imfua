@@ -8,14 +8,23 @@
 
 ## 🔹 Шаг 1. Создание базы данных
 
-Выполните очистку томов в Docker от предыдущих проектов:
+Получить список текущих контейнеров
 ```shell
-docker volume prune -a
+docker ps -a
+```
+Остановить контейнер
+```shell
+docker stop имя_контейнера
 ```
 Удаление всех остановленных контейнеров
 ```shell
 docker container prune
 ```
+Выполните очистку томов в Docker от предыдущих проектов:
+```shell
+docker volume prune -a
+```
+
 - Создайте отдельный каталог `products-mysql` (`mkdir products-mysql`) и перейдите в него (`cd products-mysql`).
 - Создайте в каталоге `products-mysql` файл `my.cnf` (для корректного отображения кириллицы) с содержимым:
 ```shell
