@@ -15,6 +15,8 @@
 - [Понятие кортежа в БД](/content/Courses/Basics_database_design/content/Docs/tuple.md)
 - [Файлы БД](/content/Courses/Basics_database_design/content/Docs/SQL_File.md)
 - [Нормализация данных: простое руководство с примерами](/content/Courses/Basics_database_design/content/Docs/data_normalization.md)
+- [Лог MySQL](/content/Courses/Basics_database_design/content/Docs/log.md)
+- [Краткий обзор движков таблиц MySQL](https://habr.com/ru/articles/64851/)
 
 
 ### Практика
@@ -28,6 +30,14 @@
   - [Руководство по представлениям (VIEW) в MySQL](/content/Courses/Basics_database_design/content/bd/VIEW_MySQL.md)
   - [Нормализация данных. Практическое руководство 1](/content/Courses/Basics_database_design/content/bd/Normalization_1.md)
   - [Лабораторная работа по нормализации данных в БД](/content/Courses/Basics_database_design/content/bd/Normalization_2.md)
+
+***
+
+Полезные ссылки:
+
+- [Air flights database analysis](https://github.com/igsuvorov/Air_flights_database_analysis?ysclid=mw0buiq89f403052923)
+- [Демонстрационная база данных](https://postgrespro.ru/education/demodb?ysclid=mw0btgkgnm893794791)
+- [test_db](https://github.com/datacharmer/test_db?ysclid=mw0bxj6m4109233723)
 
 
 ---
