@@ -1,0 +1,59 @@
+2026-11-03T08:42:54.604088Z	   12 Connect	root@localhost on  using Socket
+2026-11-03T08:42:54.604302Z	   12 Query	select @@version_comment limit 1
+2026-11-03T08:43:10.506168Z	   12 Query	SHOW DATABASES
+2026-11-03T08:43:22.586123Z	   12 Query	SELECT DATABASE()
+2026-11-03T08:43:22.586284Z	   12 Init DB	my_database
+2026-11-03T08:43:22.587617Z	   12 Query	show databases
+2026-11-03T08:43:22.588202Z	   12 Query	show tables
+2026-11-03T08:43:22.589557Z	   12 Field List	users 
+2026-11-03T08:43:26.418019Z	   12 Query	SHOW TABLES
+2026-11-03T08:43:29.482604Z	   12 Quit	
+/usr/sbin/mysqld, Version: 26.10.0 (MySQL Community Server - GPL). started with:
+Tcp port: 3306  Unix socket: /var/run/mysqld/mysqld.sock
+Time                 Id Command    Argument
+2026-11-03T08:45:52.093621Z	    0 Execute	CREATE TABLE performance_schema.innodb_redo_log_files(
+`FILE_ID` BIGINT NOT NULL COMMENT 'Id of the file.',
+`FILE_NAME` VARCHAR(2000) NOT NULL COMMENT 'Path to the file.',
+`START_LSN` BIGINT NOT NULL COMMENT 'LSN of the first block in the file.',
+`END_LSN` BIGINT NOT NULL COMMENT 'LSN after the last block in the file.',
+`SIZE_IN_BYTES` BIGINT NOT NULL COMMENT 'Size of the file (in bytes).',
+`IS_FULL` TINYINT NOT NULL COMMENT '1 iff file has no free space inside.',
+`CONSUMER_LEVEL` INT NOT NULL COMMENT 'All redo log consumers registered on smaller levels than this value, have already consumed this file.'
+)engine = 'performance_schema'
+2026-11-03T08:46:03.553765Z	    9 Connect	root@localhost on  using Socket
+2026-11-03T08:46:03.554189Z	    9 Query	select @@version_comment limit 1
+2026-11-03T08:46:12.044433Z	    9 Query	SELECT event_time, command_type, argument
+FROM mysql.general_log
+WHERE user_host LIKE 'root@%'
+ORDER BY event_time DESC
+2026-11-03T08:46:19.008299Z	    9 Query	SELECT event_time, command_type, argument
+FROM mysql.general_log
+WHERE user_host LIKE 'root@%'
+  AND argument NOT LIKE 'SET NAMES%'
+  AND argument NOT LIKE 'SHOW VARIABLES%'
+  AND argument NOT LIKE 'SELECT @@%'
+  AND argument NOT LIKE 'SET SESSION sql_log_off%'  -- на всякий случай
+ORDER BY event_time DESC
+2026-11-03T08:46:26.221978Z	    9 Query	CREATE DATABASE my_database
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci
+2026-11-03T08:46:26.222594Z	    9 Query	SELECT DATABASE()
+2026-11-03T08:46:26.222747Z	    9 Init DB	my_database
+2026-11-03T08:46:26.224010Z	    9 Query	show databases
+2026-11-03T08:46:26.229343Z	    9 Query	show tables
+2026-11-03T08:46:26.235401Z	    9 Field List	users 
+2026-11-03T08:46:26.256838Z	    9 Query	CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+2026-11-03T08:46:26.259109Z	    9 Query	INSERT INTO users (name, email) VALUES
+  ('Иван Иванов', 'ivan@example.com'),
+  ('Пётр Петров', 'petr@example.com'),
+  ('Мария Сидорова', 'maria@example.com')
+2026-11-03T08:46:26.711606Z	    9 Query	SELECT * FROM users
+2026-11-03T08:46:30.559332Z	    9 Query	SHOW DATABASES
+2026-11-03T08:46:34.039307Z	    9 Query	SELECT DATABASE()
+2026-11-03T08:46:34.039455Z	    9 Init DB	my_database
+2026-11-03T08:46:37.687364Z	    9 Query	SHOW TABLES
+2026-11-03T08:46:39.375587Z	    9 Quit	

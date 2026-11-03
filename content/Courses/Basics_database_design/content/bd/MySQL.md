@@ -25,17 +25,28 @@ InnoDB
 ### 🚀 Шаг 1: Запуск контейнера MySQL
 
 - Создайте отдельный каталог `my-mysql` и перейдите в него (`cd my-mysql`).
-- Создайте в каталоге `my-mysql` файл `my.cnf` с содержимым:
+- Создайте в каталоге `my-mysql` файл `my.cnf` с содержимым (на забудьте перейти в папку `my-mysql`):
 ```shell
 [mysqld]
 character-set-server = utf8mb4
 collation-server = utf8mb4_unicode_ci
+general_log = 1
+general_log_file = /var/lib/mysql/general.log
+log_output = FILE
 
 [client]
 default-character-set = utf8mb4
 
 [mysql]
 default-character-set = utf8mb4
+```
+В каталоге `my-mysql` создайте папку `logs` для логов
+```shell
+mkdir -p logs
+```
+создать файл `general.log` для ведения журнала действий в БД
+```shell
+touch general.log
 ```
 Контейнер с официального образа **MySQL**:
 ```bash
@@ -111,6 +122,29 @@ SHOW DATABASES;
 Получить краткую справку по командам СУБД **MySQL**
 ```sql
 help
+```
+
+Фильтр таблиц для лога
+```sql
+SELECT event_time, command_type, argument
+FROM mysql.general_log
+WHERE user_host LIKE 'root@%'
+ORDER BY event_time DESC;
+```
+и
+```sql
+SELECT event_time, command_type, argument
+FROM mysql.general_log
+WHERE user_host LIKE 'root@%'
+  AND argument NOT LIKE 'SET NAMES%'
+  AND argument NOT LIKE 'SHOW VARIABLES%'
+  AND argument NOT LIKE 'SELECT @@%'
+  AND argument NOT LIKE 'SET SESSION sql_log_off%'  -- на всякий случай
+ORDER BY event_time DESC;
+```
+и
+```sql
+SET SESSION sql_log_off = ON;
 ```
 
 Создадим базу данных с именем `my_database` с таблицей `users`. Рекомендуется сразу указывать кодировку:
@@ -739,7 +773,28 @@ SELECT * FROM orders WHERE id = 3;
 
 <a id="dump"></a>
 
-### 8.4. Создание дампа
+### 8.4. Создание лога и дампа
+
+Как проверить, что лог пишется
+```shell
+docker exec my-mysql ls -la /var/lib/mysql/general.log
+```
+Должен быть примерно такой вывод:
+```shell
+-rw-r----- 1 mysql mysql 3265 Nov  3 08:46 /var/lib/mysql/general.log
+```
+заглянуть в него:
+```shell
+docker exec my-mysql cat /var/lib/mysql/general.log
+```
+забрать лог на хост
+```shell
+docker cp my-mysql:/var/lib/mysql/general.log ./general.log
+```
+Очистка лога внутри контейнера
+```shell
+docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
+```
 
 Создание дампа БД (Экспорт в `.sql` файл)
 
