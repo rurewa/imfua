@@ -1,356 +1,128 @@
-## Нормализация данных. Практическое руководство
+## Лабораторная # 1 работа по нормализации данных в БД
 
-1. Создайте базу `shop_norm` (SQL).
-2. Создайте одну большую «плохую» таблицу `orders_bad` и наполните её.
-3. Попробуйте выполнить три операции:
-   - Обновите город Ивана в одной строке и посмотрите, что стало с другой.
-   - Удалите последний заказ Марии и проверьте, осталась ли информация о ней.
-   - Попробуйте вставить клиента без заказа — увидите, что не получается.
-4. Создайте четыре таблицы в 3NF.
-5. Повторите те же операции — убедитесь, что аномалии исчезли.
+Задача: Сознать пошаговое руководство для начинающего по нормализации данных на примере этой таблицы:
 
-Контейнер с официального образа **MySQL**:
-```bash
-docker run --name shop_norm \
-  -e MYSQL_ROOT_PASSWORD=123 \
-  -e LANG=C.UTF-8 \
-  -v mysql_data:/var/lib/mysql \
-  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
-  -d mysql:latest
+Таблица "sales_unnormalized_2"
+```markdown
+| Код отчёта | Дата  | Код покупателя | Покупатель | Код товара | Название товара | Цена | Кол-во |
+---------------------------------------------------------------------------------------------------
+| 1101       | 05.03 | 12             | Дания      | 101        | Дыни            | 800  | 1100   |
+|            |       |                |            | 102        | Клубника        | 150  | 300    |
+| 1102       | 07.03 | 23             | Испания    | 103        | Яблоки          | 120  | 1700   |
+| 1103       | 08.03 | 25             | Албания    | 104        | Лимоны          | 200  | 500    |
+| 1104       | 10.03 | 12             | Дания      | 101        | Дыни            | 800  | 2500   |
+| 1105       | 12.03 | 25             | Албания    | 103        | Яблоки          | 120  | 2000   |
+|            |       |                |            | 104        | Лимоны          | 200  | 700    |
 ```
-Чтобы убедиться, что контейнер успешно запущен, выполните:
-```bash
-docker ps
-```
-Войтите в контейнер
+
+## 📋 Таблица `sales_unnormalized_2`
+
+### SQL-скрипт для создания и заполнения новой БД с ненормализованной таблицей
+
 ```sql
-docker exec -it shop_norm mysql --default-character-set=utf8mb4 -uroot -p
-```
-
-### Шаг 1. Создание новой БД с ненормализованной таблицей
-
-1. Создание БД `shop_norm` с таблицей `orders_bad`
-```sql
-CREATE DATABASE shop_norm
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-USE shop_norm;
-
-CREATE TABLE orders_bad (
-    order_id      INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE sales_unnormalized_2 (
+    report_id     INT,
+    report_date   DATE,
+    customer_id   INT,
     customer_name VARCHAR(100),
-    customer_city VARCHAR(100),
+    product_id    INT,
     product_name  VARCHAR(100),
-    product_price INT,
-    quantity      INT,
-    order_date    DATE
-);
-```
-Проверить результат
-```sql
-SHOW DATABASES;
-```
-2. Наполним данными:
-```sql
-INSERT INTO orders_bad (customer_name, customer_city, product_name, product_price, quantity, order_date) VALUES
-  ('Иван',  'Москва',          'Яблоки',   120, 2, '2026-10-01'),
-  ('Иван',  'Москва',          'Лимоны',   200, 1, '2026-10-01'),
-  ('Мария', 'Казань',          'Яблоки',   120, 3, '2026-10-02'),
-  ('Мария', 'Казань',          'Хурма',    350, 1, '2026-10-03'),
-  ('Пётр',  'Санкт-Петербург', 'Каштаны',  200, 2, '2026-10-04');
-```
-Проверить результат
-```sql
-SHOW TABLES;
-```
-Проверим содержимое таблицы:
-```sql
-SELECT * FROM orders_bad;
-```
-Сколько потратил Иван?
-```sql
-SELECT SUM(product_price * quantity)
-FROM orders_bad
-WHERE customer_name = 'Иван';
-```
-Работает, но данные дублируются, и любое изменение — риск аномалии.
-
-3. Работа с "плохой" таблицей
-
-Обновите город Ивана в одной строке и посмотрите, что стало с другой
-```sql
-UPDATE orders_bad
-SET customer_city = 'Сочи'
-WHERE order_id = 1;
-```
-Проверка:
-```sql
-SELECT * FROM orders_bad WHERE customer_name = 'Иван';
-```
-Вывод: город Ивана теперь хранится в двух разных значениях. Это аномалия обновления: один и тот же факт (место жительства) продублирован, и при изменении легко забыть обновить все строки. В нормализованной базе (с отдельной таблицей customers) такое невозможно — город хранился бы в одной строке.
-
-Удалите последний заказ Марии и проверьте, осталась ли информация о ней
-```sql
-DELETE FROM orders_bad WHERE order_id = 4;
-```
-Проверка:
-```sql
-SELECT * FROM orders_bad WHERE customer_name = 'Мария';
-```
-Вывод: информация о Марии пока осталась, потому что у неё есть ещё один заказ (order_id = 3). Однако если удалить и его:
-```sql
-DELETE FROM orders_bad WHERE order_id = 3;
-```
-то Мария полностью исчезнет из базы:
-```sql
-SELECT * FROM orders_bad WHERE customer_name = 'Мария';
-```
-Попробуйте вставить клиента без заказа — увидите, что не получается.
-```sql
-INSERT INTO orders_bad (customer_name, customer_city)
-VALUES ('Новый клиент', 'Тверь');
-```
-Проверка:
-```sql
-SELECT * FROM orders_bad WHERE customer_name = 'Новый клиент';
-```
-Вывод: мы не можем сохранить клиента, не создавая фиктивный заказ. Все поля, относящиеся к заказу, оказались NULL. Это аномалия вставки: таблица не позволяет хранить сущность «клиент» отдельно от сущности «заказ».
-
-Итог:
-
-| Аномалия | Что делает запрос | Что показывает |
-|----------|-------------------|----------------|
-| **Обновления** | Меняет город только в одной строке | Тот же клиент имеет разные города в разных заказах |
-| **Удаления** | Удаляет последний заказ Марии | При удалении всех заказов клиент исчезает из базы |
-| **Вставки** | Пытается добавить клиента без заказа | Появляется строка с `NULL` в полях заказа |
-
-### Шаг 2. Создание дампа ненормализованной БД
-
-Создание дампа БД (Экспорт в `.sql` файл)
-
-Выйти из БД
-```sql
-\q
-```
-Делаем дамп:
-```shell
-docker exec shop_norm mysqldump -uroot -p123 shop > dump.sql
-```
-или
-```shell
-docker exec -e MYSQL_PWD=123 shop_norm mysqldump -uroot shop > dump.sql
-```
-после чего в папке `shop_norm` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой
-```shell
-cat dump.sql
-```
-`.sql` файл является текстовым представлением вашей БД (текстовый SQL-скрипт). Его можно хранить как резервную копия вашей БД, из которой потом её можно восстановить
-
-### Шаг 3  ✅ Нормализация БД. Приведение к 3NF
-
-В нормализованной базе клиент добавляется в новую таблицу `customers` без каких-либо заказов.
-
-Разделяем на **четыре таблицы**:
-
-```sql
--- Клиенты
-CREATE TABLE customers_3nf (
-    customer_id   INT AUTO_INCREMENT PRIMARY KEY,
-    customer_name VARCHAR(100) NOT NULL,
-    customer_city VARCHAR(100) NOT NULL
+    price         DECIMAL(10,2),
+    quantity      INT
 );
 
--- Товары
-CREATE TABLE products_3nf (
-    product_id    INT AUTO_INCREMENT PRIMARY KEY,
-    product_name  VARCHAR(100) NOT NULL,
-    product_price INT NOT NULL
-);
-
--- Заказы (шапка)
-CREATE TABLE orders_3nf (
-    order_id    INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT NOT NULL,
-    order_date  DATE NOT NULL,
-    FOREIGN KEY (customer_id) REFERENCES customers_3nf(customer_id)
-);
-
--- Позиции заказа (строки)
-CREATE TABLE order_items_3nf (
-    order_id   INT NOT NULL,
-    product_id INT NOT NULL,
-    quantity   INT NOT NULL,
-    PRIMARY KEY (order_id, product_id),
-    FOREIGN KEY (order_id)   REFERENCES orders_3nf(order_id),
-    FOREIGN KEY (product_id) REFERENCES products_3nf(product_id)
-);
+INSERT INTO sales_unnormalized_2 VALUES
+(1101, '2026-03-05', 12, 'Дания',   101, 'Дыни',      800, 1100),
+(1101, '2026-03-05', 12, 'Дания',   102, 'Клубника',  150,  300),
+(1102, '2026-03-07', 23, 'Испания', 103, 'Яблоки',    120, 1700),
+(1103, '2026-03-08', 25, 'Албания', 104, 'Лимоны',    200,  500),
+(1104, '2026-03-10', 12, 'Дания',   101, 'Дыни',      800, 2500),
+(1105, '2026-03-12', 25, 'Албания', 103, 'Яблоки',    120, 2000),
+(1105, '2026-03-12', 25, 'Албания', 104, 'Лимоны',    200,  700);
 ```
-Наполним:
-```sql
-INSERT INTO customers_3nf (customer_name, customer_city) VALUES
-  ('Иван',  'Москва'),
-  ('Мария', 'Казань'),
-  ('Пётр',  'Санкт-Петербург');
 
-INSERT INTO products_3nf (product_name, product_price) VALUES
-  ('Яблоки',  120),
-  ('Лимоны',  200),
-  ('Хурма',   350),
-  ('Каштаны', 200);
+---
 
-INSERT INTO orders_3nf (customer_id, order_date) VALUES
-  (1, '2026-10-01'),  -- order_id = 1, Иван
-  (2, '2026-10-02'),  -- order_id = 2, Мария
-  (2, '2026-10-03'),  -- order_id = 3, Мария
-  (3, '2026-10-04');  -- order_id = 4, Пётр
+### Содержимое таблицы
 
-INSERT INTO order_items_3nf (order_id, product_id, quantity) VALUES
-  (1, 1, 2),  -- Иван: Яблоки × 2
-  (1, 2, 1),  -- Иван: Лимоны × 1
-  (2, 1, 3),  -- Мария: Яблоки × 3
-  (3, 3, 1),  -- Мария: Хурма × 1
-  (4, 4, 2);  -- Пётр: Каштаны × 2
-```
-Проверить:
-```sql
-SELECT * FROM customers_3nf;
-SELECT * FROM products_3nf;
-SELECT * FROM orders_3nf;
-SELECT * FROM order_items_3nf;
-```
-Что мы получили?
+| report_id | report_date | customer_id | customer_name | product_id | product_name | price | quantity |
+|-----------|-------------|-------------|---------------|------------|--------------|-------|----------|
+| 1101      | 2026-03-05  | 12          | Дания         | 101        | Дыни         | 800   | 1100     |
+| 1101      | 2026-03-05  | 12          | Дания         | 102        | Клубника     | 150   | 300      |
+| 1102      | 2026-03-07  | 23          | Испания       | 103        | Яблоки       | 120   | 1700     |
+| 1103      | 2026-03-08  | 25          | Албания       | 104        | Лимоны       | 200   | 500      |
+| 1104      | 2026-03-10  | 12          | Дания         | 101        | Дыни         | 800   | 2500     |
+| 1105      | 2026-03-12  | 25          | Албания       | 103        | Яблоки       | 120   | 2000     |
+| 1105      | 2026-03-12  | 25          | Албания       | 104        | Лимоны       | 200   | 700      |
 
-| Таблица | Что хранит | Дублирование |
-|---------|-----------|--------------|
-| `customers_3nf` | Клиенты (имя, город) | ❌ Нет |
-| `products_3nf` | Товары (название, цена) | ❌ Нет |
-| `orders_3nf` | Заказы (кто, когда) | ❌ Нет |
-| `order_items_3nf` | Позиции (что, сколько) | ❌ Нет |
+---
 
-**Теперь:**
-- Иван хранится **один раз**. Переезд → одно `UPDATE`.
-- Цена яблок хранится **один раз**. Изменение → одно `UPDATE`.
-- Можно добавить клиента без заказа. Можно добавить товар без продаж.
-- Удаление заказа не удаляет клиента и товар.
+### 🧐 Нарушения нормализации
 
-Убедиться, что новые таблицы работают
-```sql
-SELECT SUM(p.product_price * oi.quantity) AS total
-FROM customers_3nf c
-JOIN orders_3nf o      ON c.customer_id = o.customer_id
-JOIN order_items_3nf oi ON o.order_id = oi.order_id
-JOIN products_3nf p    ON oi.product_id = p.product_id
-WHERE c.customer_name = 'Иван';
-```
-Если результат корректный — нормализация прошла успешно.
+1. **Повторяющиеся группы** — в исходном визуальном представлении для одного отчёта с несколькими товарами данные покупателя и даты были указаны один раз. В реляционной таблице они продублированы в каждой строке, что создаёт избыточность.
+2. **Нарушение 2NF** — первичный ключ здесь составной: `(report_id, product_id)`. Но `customer_name`, `report_date`, `customer_id` зависят только от `report_id`, а `product_name`, `price` — только от `product_id`. Это частичные зависимости.
+3. **Нарушение 3NF** — транзитивные зависимости:
+   - `customer_id → customer_name` (имя зависит от кода покупателя, а не от ключа).
+   - `product_id → product_name, price` (название и цена зависят от кода товара).
+4. **Аномалии**:
+   - Обновление: при смене названия покупателя нужно править все его строки.
+   - Вставка: нельзя добавить нового покупателя без отчёта.
+   - Удаление: удалив все отчёты покупателя, теряем информацию о нём.
 
-Запрос стал длиннее, но:
-- Нет дублирования.
-- Нет аномалий.
-- Легко добавить нового клиента или товар.
+---
 
-### Шаг 4. Перенести данные из старой таблицы в новые
+### 🎯 Задание для практики
 
-Клиенты (уникальные пары «имя + город»):
-```sql
-INSERT INTO customers_3nf (customer_name, customer_city)
-SELECT DISTINCT customer_name, customer_city
-FROM orders_bad;
-```
-Товары (уникальные пары «название + цена»):
-```sql
-INSERT INTO products_3nf (product_name, product_price)
-SELECT DISTINCT product_name, product_price
-FROM orders_bad;
-```
-Заказы (уникальные order_id + клиент + дата):
-```sql
-INSERT INTO orders_3nf (order_id, customer_id, order_date)
-SELECT o.order_id, c.customer_id, o.order_date
-FROM orders_bad o
-JOIN customers_3nf c
-  ON c.customer_name = o.customer_name
- AND c.customer_city = o.customer_city;
-```
-Позиции заказов (связь заказ ↔ товар + количество):
-```sql
-INSERT INTO order_items_3nf (order_id, product_id, quantity)
-SELECT o.order_id, p.product_id, o.quantity
-FROM orders_bad o
-JOIN products_3nf p
-  ON p.product_name = o.product_name
- AND p.product_price = o.product_price;
-```
-Проверить, что данные совпадают
-```sql
--- Старая таблица
-SELECT SUM(product_price * quantity) AS total_old
-FROM orders_bad;
+Приведите таблицу `sales_unnormalized_2` к **третьей нормальной форме (3NF)**. В результате у вас должно получиться **четыре таблицы**:
 
--- Новая схема
-SELECT SUM(p.product_price * oi.quantity) AS total_new
-FROM order_items_3nf oi
-JOIN products_3nf p ON oi.product_id = p.product_id;
-```
-Числа должны совпасть. Если нет — где-то ошибка в переносе, и старая таблица ещё пригодится для отладки.
+1. **`customers`** — справочник покупателей:
+   - `customer_id` (PK)
+   - `customer_name`
 
-Ещё проверки:
-```sql
--- Количество заказов
-SELECT COUNT(DISTINCT order_id) FROM orders_bad;
-SELECT COUNT(*) FROM orders_3nf;
+2. **`products`** — справочник товаров:
+   - `product_id` (PK)
+   - `product_name`
+   - `price`
 
--- Количество клиентов
-SELECT COUNT(DISTINCT customer_name, customer_city) FROM orders_bad;
-SELECT COUNT(*) FROM customers_3nf;
+3. **`reports`** — шапки отчётов (кто и когда):
+   - `report_id` (PK)
+   - `report_date`
+   - `customer_id` (FK → customers)
 
--- Количество товаров
-SELECT COUNT(DISTINCT product_name, product_price) FROM orders_bad;
-SELECT COUNT(*) FROM products_3nf;
-```
-Все пары чисел должны совпасть.
+4. **`report_items`** — позиции отчётов (что и сколько):
+   - `report_id` (FK → reports)
+   - `product_id` (FK → products)
+   - `quantity`
+   - Первичный ключ: `(report_id, product_id)`
 
-Убедиться, что новые таблицы работают
-```sql
--- Сколько потратил Иван?
-SELECT SUM(p.product_price * oi.quantity) AS total
-FROM customers_3nf c
-JOIN orders_3nf o       ON c.customer_id = o.customer_id
-JOIN order_items_3nf oi ON o.order_id = oi.order_id
-JOIN products_3nf p     ON oi.product_id = p.product_id
-WHERE c.customer_name = 'Иван';
-```
-Если результат корректный — нормализация прошла успешно.
+---
 
+### ✅ Порядок выполнения
 
-Теперь можно удалить старую таблицу
-```sql
-DROP TABLE orders_bad;
-```
-Или, если хотите сохранить её как архив:
-```sql
-RENAME TABLE orders_bad TO orders_bad_backup;
-```
-RENAME безопаснее: таблица остаётся в базе, но под другим именем. Если через неделю выяснится, что что-то упустили, — данные под рукой.
+1. Создайте новую базу (например, `normalization_task`) и в ней — таблицу `sales_unnormalized_2` с данными выше.
+2. Создайте четыре нормализованные таблицы **рядом** с исходной.
+3. Перенесите данные с помощью `INSERT ... SELECT`:
+   - Уникальные покупатели → `customers`.
+   - Уникальные товары → `products`.
+   - Уникальные отчёты → `reports`.
+   - Позиции → `report_items`.
+4. Проверьте, что данные не потерялись и не исказились:
+   - Сравните количество отчётов, покупателей, товаров.
+   - Сравните общую сумму (`SUM(price * quantity)`) до и после.
+5. Выполните несколько тестовых запросов на новой схеме (например, «сколько потратил покупатель с кодом 12?»).
+6. Только после успешной проверки удалите или переименуйте исходную таблицу.
 
-**Главная мысль:** нормализация — это не «максимальное количество таблиц», а **устранение аномалий**. Каждый факт должен храниться в одном месте. Если правило нарушено — вы либо получите противоречивые данные, либо не сможете что-то добавить или удалить без потерь.
+---
 
-### Шаг 5. Создание дампа
+### 💡 Подсказки
 
-Создание дампа БД (Экспорт в `.sql` файл)
+- Для заполнения `customers` используйте `SELECT DISTINCT customer_id, customer_name FROM sales_unnormalized_2;`.
+- Для `products` — `SELECT DISTINCT product_id, product_name, price FROM sales_unnormalized_2;`.
+- Для `reports` — `SELECT DISTINCT report_id, report_date, customer_id FROM sales_unnormalized_2;`.
+- Для `report_items` — прямое соединение исходной таблицы с `reports` и `products` по соответствующим ID (или просто `SELECT report_id, product_id, quantity FROM sales_unnormalized_2;`, так как `report_id` и `product_id` уже есть в исходной таблице).
 
-Выйти из БД
-```sql
-\q
-```
-Делаем дамп:
-```shell
-docker exec -e MYSQL_PWD=123 shop_norm mysqldump -uroot shop > norm_dump.sql
-```
-после чего в папке `shop_norm` появится текстовый файл `norm_dump.sql`, содержимое которого можно увидеть командой
-```shell
-cat norm_dump.sql
-```
-`.sql` файл является текстовым представлением вашей БД (текстовый SQL-скрипт). Его можно хранить как резервную копия вашей БД, из которой потом её можно восстановить
+Можно выполнить в имеющемя Docker-контейнере с MySQL: создать новую базу, перенести данные через `INSERT ... SELECT`, проверить суммы и только потом удалить исходную таблицу.
+
+Результат оформить в виде отдельного `README.md` и дампом в этой же папке
 
 > Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
