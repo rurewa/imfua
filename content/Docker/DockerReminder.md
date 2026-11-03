@@ -44,6 +44,8 @@ docker --version
 ```shell
 docker stats
 ```
+выйти из `stats` по **Ctrl+C**
+
 Показать все контейнеры, включая остановленные:
 ```shell
 docker ps -a
@@ -76,12 +78,12 @@ docker buildx du
 ```shell
 docker volume prune -a
 ```
-```shell
-docker image prune -a
-```
 Удаление всех остановленных контейнеров
 ```shell
 docker container prune
+```
+```shell
+docker image prune -a
 ```
 Очистить кэш всех сборок:
 ```shell
