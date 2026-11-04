@@ -25,6 +25,10 @@ qt6-docker-app/
 ```shell
 mkdir -p qt6-docker-app && touch qt6-docker-app/Dockerfile qt6-docker-app/main.cpp qt6-docker-app/CMakeLists.txt && cd qt6-docker-app
 ```
+после этого обновите Ubuntu WSL
+```shell
+sudo apt list --upgradable -a && sudo apt update && sudo apt full-upgrade -y
+```
 
 ### 2. Содержимое файла `Dockerfile`
 ```dockerfile
