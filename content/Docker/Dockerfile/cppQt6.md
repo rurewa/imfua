@@ -127,6 +127,10 @@ int main(int argc, char *argv[])
 
 ### 5. Сборка и запуск
 
+Активировать группу без перезагрузки (дать временные права на выполнение нужных команд в WSL):
+```shell
+newgrp docker
+```
 В командной строке **VS Code+WSL**, находясь в папке `qt6-docker-app`, выполнить:
 ```shell
 docker build -t qt6-app .
