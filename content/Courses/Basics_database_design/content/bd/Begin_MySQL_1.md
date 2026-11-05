@@ -7,6 +7,7 @@
 - подключиться к нему
 - выполнять основные операции с базами данных
 - сделать дамп базы данных
+- выгрузить лог базы данных
 
 ---
 
@@ -20,24 +21,22 @@
 ```shell
 docker ps -a
 ```
-
 2. Остановить и удалить **только учебный** контейнер (если он уже существует):
 ```shell
-docker stop my-mysql 2>/dev/null
-docker rm my-mysql 2>/dev/null
+docker stop имя_контейнера
+docker rm имя_контейнера
 ```
-
-3. Удалить **только** volume учебного проекта:
+3. Удалить все учебные **volume**
 ```shell
-docker volume rm mysql_data 2>/dev/null
+docker volume prune -a
 ```
 
 > Если вы уверены, что на хосте нет других важных контейнеров и volumes, можно использовать более широкие команды:
-> ```shell
-> docker stop $(docker ps -q)
-> docker container prune
-> docker volume prune -a
-> ```
+```shell
+docker stop $(docker ps -q)
+docker container prune
+docker volume prune -a
+```
 > Но **будьте осторожны** — они удаляют всё неиспользуемое, а не только учебный проект.
 
 **Создание каталога проекта:**
@@ -237,8 +236,41 @@ SELECT * FROM users WHERE id = 1\G
 ```
 `\G` заменяет точку с запятой и не требует `;` в конце.
 
-**7. Удаление данных**
+**7. Создание дампа БД (экспорт в `.sql`-файл на хост для последующего восстановления):**
 
+Выйти из клиента MySQL (на всякий случай):
+```sql
+\q
+```
+Делаем дамп - рекомендуемый вариант, без GTID и с согласованным снимком:
+```shell
+docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot \
+  --set-gtid-purged=OFF \
+  --single-transaction \
+  my_database > dump_clean.sql
+```
+После этого в папке `my-mysql` появится текстовый файл `dump.sql` (или `dump_clean.sql`), содержимое которого можно увидеть командой:
+```shell
+cat dump.sql
+```
+`.sql`-файл является текстовым представлением вашей БД (SQL-скрипт). Его можно хранить как резервную копию и использовать для восстановления.
+
+**8. Удаление данных**
+
+Снова войдём в контейнер:
+```shell
+docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
+```
+Переключимся на нужную нам БД
+```sql
+USE my_database;
+```
+Теперь все последующие команды будут применяться к этой базе данных.
+
+Получить существующие таблицы:
+```sql
+SHOW TABLES;
+```
 Сначала получим содержимое таблицы для последующего сравнения:
 ```sql
 SELECT * FROM users;
@@ -249,7 +281,7 @@ DELETE FROM users WHERE id = 2;
 ```
 ⚠️ Если удалить `WHERE`, удалятся **все** строки.
 
-**8. Удаление таблицы**
+**9. Удаление таблицы**
 ```sql
 DROP TABLE users;
 ```
@@ -258,7 +290,7 @@ DROP TABLE users;
 SHOW TABLES;
 ```
 
-**9. Удаление базы данных**
+**10. Удаление базы данных**
 ```sql
 DROP DATABASE my_database;
 ```
@@ -274,7 +306,7 @@ SHOW DATABASES;
 
 ---
 
-### 📝 Шаг 4: Создание лога и дампа
+### 📝 Шаг 4: Создание лога
 
 Все команды записываются в файл `general.log` внутри контейнера (при `log_output = FILE` в `my.cnf`).
 
@@ -290,42 +322,15 @@ docker exec my-mysql cat /var/lib/mysql/general.log
 ```
 Забрать лог на хост:
 ```shell
-docker cp my-mysql:/var/lib/mysql/general.log ./general.log
+docker exec my-mysql cat /var/lib/mysql/general.log \
+  | grep "Query" \
+  | grep -v -E "SET NAMES|SET autocommit|SET sql_mode|SET character_set_results|SHOW VARIABLES|SHOW STATUS|SHOW WARNINGS|SELECT @@|SELECT DATABASE\(\)|time_zone" \
+  > my_actions.log
 ```
 Очистка лога внутри контейнера:
 ```shell
 docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
 ```
-
-> 💡 Если хотите работать с логом **через таблицу** `mysql.general_log` и фильтровать его SQL-запросами (через VIEW), смотрите **руководство №2**. Там используется `log_output = TABLE`.
-
-**Создание дампа БД (экспорт в `.sql`-файл на хост для последующего восстановления):**
-
-Выйти из клиента MySQL (на всякий случай):
-```sql
-\q
-```
-Делаем дамп:
-```shell
-docker exec my-mysql mysqldump -uroot -p123 my_database > dump.sql
-```
-Или без предупреждения о пароле в командной строке:
-```shell
-docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot my_database > dump.sql
-```
-Или рекомендуемый вариант — без GTID и с согласованным снимком:
-```shell
-docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot \
-  --set-gtid-purged=OFF \
-  --single-transaction \
-  my_database > dump_clean.sql
-```
-
-После этого в папке `my-mysql` появится текстовый файл `dump.sql` (или `dump_clean.sql`), содержимое которого можно увидеть командой:
-```shell
-cat dump.sql
-```
-`.sql`-файл является текстовым представлением вашей БД (SQL-скрипт). Его можно хранить как резервную копию и использовать для восстановления.
 
 ---
 
@@ -347,19 +352,5 @@ docker logs my-mysql
 ```shell
 docker logs my-mysql > log.txt
 ```
-Если нужно пересоздать контейнер с сохранением данных:
-```shell
-docker stop my-mysql
-docker rm my-mysql
-docker run --name my-mysql \
-  -e MYSQL_ROOT_PASSWORD=123 \
-  -e LANG=C.UTF-8 \
-  -v mysql_data:/var/lib/mysql \
-  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
-  -d mysql:8.0
-```
-> ⚠️ Если вы переходите с другой major-версии MySQL и контейнер не стартует — удалите старый volume: `docker volume rm mysql_data` (данные будут потеряны).
-
----
 
 > Если вы обнаружили ошибку в этом тексте — сообщите пожалуйста автору!
