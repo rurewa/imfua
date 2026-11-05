@@ -682,7 +682,7 @@ cat dump_clean.sql
 ## 🧨 Шаг 13: Удаление таблиц и базы
 
 Снова зайти в контейнер с БД
-```sql
+```shell
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
 ```sql
@@ -692,7 +692,7 @@ DROP TABLE customers;
 SHOW TABLES;
 DROP DATABASE sql_practice;
 ```
-Проверить:
+База **my_actions** исчезнет вместе с базой (он там лежал). Проверить:
 ```sql
 SHOW DATABASES;
 ```
@@ -785,7 +785,7 @@ SELECT * FROM orders;
 SELECT * FROM my_actions LIMIT 5;
 ```
 
-> Если VIEW `my_actions` не восстановился (потому что вы сделали дамп базы `sql_practice`, а VIEW лежал именно там, и был включён в дамп), он должен появиться после импорта. Если вы создавали VIEW в базе `mysql` — он не попадёт в дамп `sql_practice`, и его нужно создать заново.
+> VIEW my_actions был создан в sql_practice и включён в дамп (mysqldump по умолчанию сохраняет VIEW). После импорта он должен восстановиться. Если вы создавали VIEW в базе mysql — он не попадёт в дамп sql_practice, и его нужно создать заново.
 
 ---
 
