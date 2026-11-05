@@ -1,327 +1,8 @@
-## Интерактивная работа с MySQL в изолированном окружении Docker.
-
-InnoDB
-
-Навигация:
-- [Docker + MySQL + кириллица](#docker)
-- [Создание БД и таблиц](#create-db)
-- [CRUD-операции](#crud)
-- [Фильтрация, сортировка, ограничение](#filter)
-- [Агрегация и группировка](#aggregate)
-- [Все основные типы JOIN](#join)
-- [Подзапросы и UNION](#subqueries)
-- [Изменение структуры](#alter)
-- [Создание дампа БД](#dump)
-- [Удаление объектов](#drop)
-- [Направления для дальнейшего изучения](#next)
-
-Задачи:
-- запустить «чистый» контейнер
-- подключиться к нему
-- выполнять основные операции с базами данных
-- сделать дамп базы данных
-
-<a id="docker"></a>
-### 🚀 Шаг 1: Запуск контейнера MySQL
-
-- Создайте отдельный каталог `my-mysql` и перейдите в него (`cd my-mysql`).
-- Создайте в каталоге `my-mysql` файл `my.cnf` с содержимым (на забудьте перейти в папку `my-mysql`):
-```shell
-[mysqld]
-character-set-server = utf8mb4
-collation-server = utf8mb4_unicode_ci
-general_log = 1
-general_log_file = /var/lib/mysql/general.log
-log_output = FILE
-
-[client]
-default-character-set = utf8mb4
-
-[mysql]
-default-character-set = utf8mb4
-```
-В каталоге `my-mysql` создайте папку `logs` для логов
-```shell
-mkdir -p logs
-```
-создать файл `general.log` для ведения журнала действий в БД
-```shell
-touch general.log
-```
-Контейнер с официального образа **MySQL**:
-```bash
-docker run --name my-mysql \
-  -e MYSQL_ROOT_PASSWORD=123 \
-  -e LANG=C.UTF-8 \
-  -v mysql_data:/var/lib/mysql \
-  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
-  -d mysql:latest
-```
-Разберем, что делает эта команда:
-*   `--name my-mysql`: Присваивает контейнеру понятное имя `my-mysql`, чтобы не использовать его ID.
-*   `-e MYSQL_ROOT_PASSWORD=123`: Устанавливает пароль для пользователя root. В учебном примере — 123, в реальных проектах используйте надёжный пароль.
-*   `-d`: Запускает контейнер в фоновом режиме (detached mode).
-*   `mysql:latest`: Указывает, что нужно использовать последнюю версию официального образа MySQL.
-
-Чтобы убедиться, что контейнер успешно запущен, выполните:
-```bash
-docker ps
-```
-Вы должны увидеть свой контейнер `my-mysql` в списке работающих.
-
-Где "физически" зранятся файлы новой базы данных?
-
-Увидеть физические файлы базы в вашем Docker-контейнере:
-```shell
-docker exec -it my-mysql ls -la /var/lib/mysql
-```
-Вы увидите примерно такую картину:
-```shell
-drwxr-xr-x  mysql mysql  ibdata1
-drwxr-xr-x  mysql mysql  ib_logfile0
-drwxr-xr-x  mysql mysql  ib_logfile1
-drwxr-xr-x  mysql mysql  #innodb_temp
-drwxr-xr-x  mysql mysql  mysql/
-drwxr-xr-x  mysql mysql  performance_schema/
-drwxr-xr-x  mysql mysql  sys/
-drwxr-xr-x  mysql mysql  sql_practice/
-```
-
-### 🔌 Шаг 2: Подключение к MySQL в интерактивном режиме
-
-Теперь, когда контейнер работает, к нему нужно подключиться. Для этого используется команда `docker exec`, которая позволяет выполнить команду внутри работающего контейнера.
-
-Выполните следующую команду, чтобы открыть интерактивную оболочку **MySQL**:
-
-```bash
-docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
-```
-*   `-it`: Флаги `-i` (interactive) и `-t` (tty) вместе создают интерактивный терминал.
-*   `mysql -uroot -p`: Запускает клиент MySQL от имени пользователя `root` и запрашивает пароль.
-
-После ввода пароля вы увидите приглашение `mysql>`. Теперь вы находитесь в интерактивной оболочке и можете выполнять любые SQL-команды.
-
-### 🛠️ Шаг 3: Основные операции с базами данных и таблицами
-
-Внутри оболочки **MySQL** вы можете выполнять все стандартные SQL-команды.
-
-Проверить кодировку сразу после подключения:
-```sql
-SHOW VARIABLES LIKE 'character_set%';
-```
-Если `character_set_client`, `character_set_connection` и `character_set_results` равны `utf8mb4` — всё в порядке.
-
-**1. Просмотр существующих баз данных**
-```sql
-SHOW DATABASES;
-```
-Эта команда покажет список всех баз данных, включая системные (`information_schema`, `mysql`, `performance_schema`, `sys`).
-
-**2. Создание новой базы данных и таблицы в ней**
-
-Получить краткую справку по командам СУБД **MySQL**
-```sql
-help
-```
-
-Фильтр таблиц для лога
-```sql
-SELECT event_time, command_type, argument
-FROM mysql.general_log
-WHERE user_host LIKE 'root@%'
-ORDER BY event_time DESC;
-```
-и
-```sql
-SELECT event_time, command_type, argument
-FROM mysql.general_log
-WHERE user_host LIKE 'root@%'
-  AND argument NOT LIKE 'SET NAMES%'
-  AND argument NOT LIKE 'SHOW VARIABLES%'
-  AND argument NOT LIKE 'SELECT @@%'
-  AND argument NOT LIKE 'SET SESSION sql_log_off%'  -- на всякий случай
-ORDER BY event_time DESC;
-```
-и
-```sql
-SET SESSION sql_log_off = ON;
-```
-
-Создадим базу данных с именем `my_database` с таблицей `users`. Рекомендуется сразу указывать кодировку:
-```sql
-CREATE DATABASE my_database
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-USE my_database;
-
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-INSERT INTO users (name, email) VALUES
-  ('Иван Иванов', 'ivan@example.com'),
-  ('Пётр Петров', 'petr@example.com'),
-  ('Мария Сидорова', 'maria@example.com');
-
-SELECT * FROM users;
-```
-Это инструкции, которые указывают СУБД: «создай базу», «создай таблицу», «вставь строку»
-
-Получить существующие БД
-```sql
-SHOW DATABASES;
-```
-
-**3. Выбор базы данных для работы**
-```sql
-USE my_database;
-```
-Теперь все последующие команды будут применяться к этой базе данных!
-
-Получить существующие таблицы
-```sql
-SHOW TABLES;
-```
-
-**4. Вставка данных**
-
-Сначала получим текущие данные указанной таблицы
-```sql
-SELECT * FROM users;
-```
-затем добавим новые:
-```sql
-INSERT INTO users (name, email) VALUES ('Павел Иванов', 'pavel@example.com');
-INSERT INTO users (name, email) VALUES ('Марк Аврелий', 'mark@example.com');
-```
-Проверка кодировки после вставки (опционально):
-```sql
-SELECT name, HEX(name) FROM users WHERE id = 1;
-```
-
-**5. Просмотр данных**
-```sql
-SELECT * FROM users;
-```
-
-**6. Обновление данных**
-```sql
-UPDATE users SET name = 'Иван Петров' WHERE id = 1;
-```
-просто меняем **id** в указанной записи
-
-или
-```sql
-UPDATE users SET name = 'Vasya' WHERE id = 1;
-```
-Посмотреть все строки таблицы
-```sql
-SELECT * FROM users;
-```
-Посмотреть одну конкретную запись (строку)
-```sql
-SELECT * FROM users WHERE id = 1;
-```
-Получить указанные поля
-```sql
-SELECT name, email FROM users;
-```
-или получить указанное поле
-```sql
-SELECT name FROM users;
-```
-Посмотреть только нужные поля (столбцы)
-```sql
-SELECT name, email FROM users WHERE id = 1;
-```
-Удобный вертикальный вывод
-```sql
-SELECT * FROM users WHERE id = 1\G
-```
-`\G` заменяет точку с запятой и не требует `;` в конце
-
-**7. Удаление данных**
-
-Сначала получим содержимое таблицы для последующего сравнения
-```sql
-SELECT * FROM users;
-```
-затем удалим указанную запись
-```sql
-DELETE FROM users WHERE id = 2;
-```
-Если удалить `WHERE`, удалятся все строки
-
-**8. Удаление таблицы**
-```sql
-DROP TABLE users;
-```
-Получить существующие таблицы
-```sql
-SHOW TABLES;
-```
-
-**9. Удаление базы данных**
-```sql
-DROP DATABASE my_database;
-```
-Просмотр существующих баз данных
-```sql
-SHOW DATABASES;
-```
-```sql
-exit
-```
-или
-```sql
-quit
-```
-ещё
-```sql
-\q
-```
-
-### 🧹 Шаг 4: Управление контейнером
-
-**Остановка контейнера:**
-```bash
-docker stop my-mysql
-```
-**Запуск ранее остановленного контейнера:**
-```bash
-docker start my-mysql
-```
-**Просмотр логов (может пригодиться для отладки):**
-```bash
-docker logs my-mysql
-```
-**Просмотр логов с перенаправлением в файл**
-```shell
-docker logs my-mysql > log.txt
-```
-Если нужно пересоздать контейнер с сохранением данных:
-```shell
-docker stop my-mysql
-docker rm my-mysql
-docker run --name my-mysql \
-  -e MYSQL_ROOT_PASSWORD=123 \
-  -e LANG=C.UTF-8 \
-  -v mysql_data:/var/lib/mysql \
-  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
-  -d mysql:latest
-```
-
-***
-
 ## Практическое руководство по основам SQL
 
----
+### 🔌 Подключение к контейнеру
 
-## 🔌 Подключение к контейнеру
-
-Если контейнер ещё не запущен, запустите его:
+Если созданный ранее контейнер **my-mysql** ещё не запущен, запустите его:
 ```bash
 docker start my-mysql
 ```
@@ -333,8 +14,7 @@ docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 
 ---
 
-<a id="create-db"></a>
-## 🗄️ Шаг 1: Создание учебной базы данных
+#### 🗄️ Шаг 1: Создание учебной базы данных
 
 ```sql
 CREATE DATABASE sql_practice
@@ -350,7 +30,7 @@ SHOW DATABASES;
 
 ---
 
-## 📋 Шаг 2: Создание таблиц
+#### 📋 Шаг 2: Создание таблиц
 
 Создадим две связанные таблицы: `customers` (клиенты) и `orders` (заказы):
 ```sql
@@ -396,8 +76,7 @@ orders.ibd
 
 ---
 
-<a id="crud"></a>
-## ✍️ Шаг 3: Вставка данных (INSERT)
+#### ✍️ Шаг 3: Вставка данных (INSERT)
 
 Вернуться в базу данных
 ```shell
@@ -447,18 +126,17 @@ SELECT * FROM orders;
 
 ---
 
-<a id="filter"></a>
 ## 🔍 Шаг 4: Выборка данных (SELECT)
 
-### 4.1. Все столбцы и все строки
+##### 4.1. Все столбцы и все строки
 ```sql
 SELECT * FROM customers;
 ```
-### 4.2. Только нужные столбцы
+##### 4.2. Только нужные столбцы
 ```sql
 SELECT name, city FROM customers;
 ```
-### 4.3. Условие `WHERE` (ГДЕ)
+##### 4.3. Условие `WHERE` (ГДЕ)
 ```sql
 SELECT * FROM customers WHERE city = 'Москва';
 SELECT * FROM orders WHERE amount > 1000;
@@ -467,7 +145,7 @@ SELECT * FROM orders WHERE status = 'new' OR status = 'cancelled';
 ```
 `amount` — количество, сумма
 
-### 4.4. Сортировка `ORDER BY`
+##### 4.4. Сортировка `ORDER BY`
 ```sql
 SELECT * FROM customers ORDER BY name;
 SELECT * FROM orders ORDER BY amount DESC;
@@ -475,16 +153,16 @@ SELECT * FROM orders ORDER BY order_date DESC, amount ASC;
 ```
 Сортировка заказов по сумме (от большей к меньшей)
 
-### 4.5. Ограничение количества строк `LIMIT`
+##### 4.5. Ограничение количества строк `LIMIT`
 ```sql
 SELECT * FROM orders ORDER BY amount DESC LIMIT 3;
 ```
-### 4.6. Поиск по шаблону `LIKE`
+##### 4.6. Поиск по шаблону `LIKE`
 ```sql
 SELECT * FROM customers WHERE name LIKE 'И%';      -- начинается на И
 SELECT * FROM customers WHERE email LIKE '%@example.com';
 ```
-### 4.7. Диапазон `BETWEEN`, список `IN`
+##### 4.7. Диапазон `BETWEEN`, список `IN`
 ```sql
 SELECT * FROM orders WHERE amount BETWEEN 1000 AND 3000;
 SELECT * FROM customers WHERE city IN ('Москва', 'Казань');
@@ -497,15 +175,14 @@ SELECT * FROM customers WHERE city = 'Москва' OR city = 'Казань';
 ```
 Результат одинаковый — обе строки вернут клиентов из Москвы и Казани. Но **IN** короче, читабельнее и удобнее, особенно если значений много.
 
-### 4.8. Пустые значения `IS NULL`
+##### 4.8. Пустые значения `IS NULL`
 ```sql
 SELECT * FROM customers WHERE city IS NULL;
 ```
 
 ---
 
-<a id="aggregate"></a>
-## 📊 Шаг 5: Агрегатные функции
+#### 📊 Шаг 5: Агрегатные функции
 
 Всего заказов
 ```sql
@@ -526,16 +203,16 @@ SELECT MIN(amount) AS min_amount, MAX(amount) AS max_amount FROM orders;
 
 ---
 
-## 📈 Шаг 6: Группировка `GROUP BY` и `HAVING`
+#### 📈 Шаг 6: Группировка `GROUP BY` и `HAVING`
 
-### 6.1. Количество заказов по каждому клиенту
+##### 6.1. Количество заказов по каждому клиенту
 ```sql
 SELECT customer_id, COUNT(*) AS order_count, SUM(amount) AS total_amount
 FROM orders
 GROUP BY customer_id;
 ```
 
-### 6.2. Соединение с именами клиентов
+##### 6.2. Соединение с именами клиентов
 ```sql
 SELECT c.name, COUNT(o.id) AS order_count, SUM(o.amount) AS total_amount
 FROM customers c
@@ -545,7 +222,7 @@ ORDER BY total_amount DESC;
 ```
 Алиасы c и o — см. раздел 7.1.
 
-### 6.3. Фильтрация групп HAVING
+##### 6.3. Фильтрация групп HAVING
 ```sql
 SELECT customer_id, SUM(amount) AS total_amount
 FROM orders
@@ -555,10 +232,9 @@ HAVING SUM(amount) > 2000;
 
 ---
 
-<a id="join"></a>
-## 🔗 Шаг 7: Соединения **JOIN**
+#### 🔗 Шаг 7: Соединения **JOIN**
 
-### 7.1. INNER JOIN — только совпадающие строки
+##### 7.1. INNER JOIN — только совпадающие строки
 ```sql
 SELECT c.name, o.order_date, o.amount, o.status
 FROM customers c
@@ -597,7 +273,7 @@ SELECT c.id, o.id FROM customers c JOIN orders o ON c.id = o.customer_id;
 [Подробней про алиасы в SQL тут >>>](/content/Courses/Basics_database_design/content/Docs/Aliases.md)
 
 
-### 7.2. LEFT JOIN — все клиенты, даже без заказов
+##### 7.2. LEFT JOIN — все клиенты, даже без заказов
 ```sql
 SELECT c.name, o.id AS order_id, o.amount
 FROM customers c
@@ -607,7 +283,7 @@ LEFT JOIN orders o ON c.id = o.customer_id;
 
 Клиенты без заказов будут иметь `NULL` в полях заказа.
 
-### 7.3. RIGHT JOIN — все заказы, даже если клиент удалён (редко используется)
+##### 7.3. RIGHT JOIN — все заказы, даже если клиент удалён (редко используется)
 ```sql
 SELECT c.name, o.id AS order_id
 FROM customers c
@@ -625,7 +301,7 @@ FROM orders o
 LEFT JOIN customers c ON o.customer_id = c.id;
 ```
 
-### 7.4. JOIN и GROUP BY — соединение с агрегацией
+##### 7.4. JOIN и GROUP BY — соединение с агрегацией
 
 Соединим таблицы и посчитаем агрегаты:
 ```sql
@@ -650,14 +326,13 @@ ORDER BY total_amount DESC;
 
 ---
 
-<a id="subqueries"></a>
-## 🧩 Шаг 8: Подзапросы и **UNION**
+#### 🧩 Шаг 8: Подзапросы и **UNION**
 
-### 8.1. Подзапросы (Subqueries)
+##### 8.1. Подзапросы (Subqueries)
 
 Подзапрос — это `SELECT`-запрос, вложенный внутрь другого SQL-запроса. Подзапрос выполняется первым, а его результат используется внешним запросом.
 
-#### Подзапрос в WHERE (с IN)
+Подзапрос в WHERE (с IN)
 ```sql
 SELECT name, city
 FROM customers
@@ -669,7 +344,7 @@ WHERE id IN (
 ```
 Вернёт клиентов, у которых есть хотя бы один заказ на сумму больше 1000.
 
-#### Подзапрос в WHERE (со сравнением)
+Подзапрос в WHERE (со сравнением)
 ```sql
 SELECT name, city
 FROM customers
@@ -682,7 +357,7 @@ WHERE id = (
 ```
 Вернёт клиента с самым крупным заказом.
 
-#### Подзапрос в FROM (производная таблица)
+Подзапрос в FROM (производная таблица)
 ```sql
 SELECT c.name, o.total
 FROM customers c
@@ -695,7 +370,7 @@ WHERE o.total > 2000;
 ```
 Подзапрос в `FROM` формирует временную таблицу с агрегатами, которую затем соединяем с `customers`.
 
-#### Подзапрос в SELECT (скалярный)
+Подзапрос в SELECT (скалярный)
 ```sql
 SELECT c.name,
        (SELECT COUNT(*) FROM orders o WHERE o.customer_id = c.id) AS order_count
@@ -703,7 +378,7 @@ FROM customers c;
 ```
 Для каждого клиента считается количество его заказов.
 
-#### EXISTS и NOT EXISTS
+EXISTS и NOT EXISTS
 ```sql
 -- Клиенты, у которых есть хотя бы один заказ
 SELECT name FROM customers c
@@ -719,11 +394,11 @@ WHERE NOT EXISTS (
 ```
 `EXISTS` часто работает быстрее, чем `IN`, особенно если внешняя таблица большая, а внутренняя — маленькая.
 
-### 8.2. UNION и UNION ALL
+#### 8.2. UNION и UNION ALL
 
 `UNION` объединяет результаты двух `SELECT`-запросов в один набор строк.
 
-#### UNION (удаляет дубликаты)
+UNION (удаляет дубликаты)
 ```sql
 SELECT name, city FROM customers WHERE city = 'Москва'
 UNION
@@ -731,7 +406,7 @@ SELECT name, city FROM customers WHERE city = 'Казань';
 ```
 Вернёт клиентов из Москвы и Казани, при этом дубликаты строк удаляются.
 
-#### UNION ALL (сохраняет дубликаты, работает быстрее)
+UNION ALL (сохраняет дубликаты, работает быстрее)
 ```sql
 SELECT city FROM customers
 UNION ALL
@@ -739,12 +414,12 @@ SELECT city FROM customers;
 ```
 Вернёт все города, включая повторы.
 
-#### Требования к UNION
+Требования к UNION
 - Одинаковое количество столбцов в обоих запросах.
 - Совместимые типы данных.
 - Имена столбцов берутся из первого запроса.
 
-### 8.3. Сравнение JOIN и подзапросов
+#### 8.3. Сравнение JOIN и подзапросов
 
 | Критерий | JOIN | Подзапрос |
 |----------|------|-----------|
@@ -755,8 +430,7 @@ SELECT city FROM customers;
 
 ---
 
-<a id="alter"></a>
-## ✏️ Шаг 9: Обновление данных (UPDATE)
+#### ✏️ Шаг 9: Обновление данных (UPDATE)
 
 ```sql
 UPDATE customers SET city = 'Екатеринбург' WHERE id = 4;
@@ -771,9 +445,7 @@ SELECT * FROM orders WHERE id = 3;
 
 ⚠️ **Важно:** всегда указывайте `WHERE`, иначе обновятся все строки!
 
-<a id="dump"></a>
-
-### 8.4. Создание лога и дампа
+#### 8.4. Создание лога и дампа
 
 Как проверить, что лог пишется
 ```shell
@@ -822,7 +494,7 @@ cat dump.sql
 
 ---
 
-## 🗑️ Шаг 10: Удаление и изменение данных (DELETE)
+#### 🗑️ Шаг 10: Удаление и изменение данных (DELETE)
 
 
 Снова зайти в конейнер с БД
@@ -853,9 +525,9 @@ SELECT * FROM orders;
 
 ---
 
-## 🏗️ Шаг 11: Изменение структуры (ALTER TABLE)
+#### 🏗️ Шаг 11: Изменение структуры (ALTER TABLE)
 
-### Добавить столбец
+##### Добавить столбец
 ```sql
 ALTER TABLE customers ADD COLUMN phone VARCHAR(20);
 ```
@@ -876,12 +548,12 @@ SELECT * FROM customers WHERE id = 4;
 SELECT * FROM customers;
 ```
 
-### Изменить тип столбца
+##### Изменить тип столбца
 ```sql
 ALTER TABLE customers MODIFY COLUMN phone VARCHAR(30);
 ```
 
-### Удалить столбец
+##### Удалить столбец
 ```sql
 ALTER TABLE customers DROP COLUMN phone;
 ```
@@ -892,7 +564,6 @@ SELECT * FROM customers;
 
 ---
 
-<a id="drop"></a>
 ## 🧨 Шаг 12: Удаление таблиц и базы
 
 ```sql
@@ -911,7 +582,7 @@ SHOW DATABASES;
 \q
 ```
 
-## 🧨 Шаг 13: Восстановление удалённой БД
+#### 🧨 Шаг 13: Восстановление удалённой БД
 
 
 Проверьте, что контейнер запущен
@@ -969,7 +640,7 @@ SELECT * FROM orders;
 
 ---
 
-## 🧰 Полезные команды
+#### 🧰 Полезные команды
 
 | Команда | Что делает |
 |---------|------------|
@@ -983,8 +654,7 @@ SELECT * FROM orders;
 
 ---
 
-<a id="next"></a>
-## 📝 Что дальше?
+#### 📝 Что дальше?
 
 Когда освоите эти основы, можно переходить к:
 - **Представлениям** (`CREATE VIEW`)
