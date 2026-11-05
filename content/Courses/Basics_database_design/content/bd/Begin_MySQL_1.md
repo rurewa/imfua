@@ -47,11 +47,11 @@ default-character-set = utf8mb4
 [mysql]
 default-character-set = utf8mb4
 ```
-В каталоге `my-mysql` создайте папку `logs` для логов
+В каталоге `my-mysql` создайте папку `logs` для логов ???
 ```shell
 mkdir -p logs
 ```
-создать файл `general.log` для ведения лога (журнала) действий в БД
+создать файл `general.log` для ведения лога (журнала) действий в БД ???
 ```shell
 touch general.log
 ```
@@ -288,6 +288,51 @@ quit
 ```sql
 \q
 ```
+
+### Шаг 3: Создание лога и дампа
+
+Все команды записываются в файл `general.log` внутри контейнера.
+
+Проверить это:
+```shell
+docker exec my-mysql ls -la /var/lib/mysql/general.log
+```
+Заглянуть в лог:
+```shell
+docker exec my-mysql cat /var/lib/mysql/general.log
+```
+Забрать лог на хост:
+```shell
+docker cp my-mysql:/var/lib/mysql/general.log ./general.log
+```
+Очистка лога внутри контейнера:
+```shell
+docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
+```
+
+Создание дампа БД (Экспорт в `.sql` файл на хост для последующего восстановления)
+
+Выйти из текущей БД (на всякий случай)
+```sql
+\q
+```
+Делаем дамп:
+```shell
+docker exec my-mysql mysqldump -uroot -p123 sql_practice > dump.sql
+```
+или
+```shell
+docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot sql_practice > dump.sql
+```
+или
+```shell
+docker exec my-mysql mysqldump -uroot -p123 --set-gtid-purged=OFF sql_practice > dump_clean.sql
+```
+после чего в папке `my-mysql` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой
+```shell
+cat dump.sql
+```
+`.sql` файл является текстовым представлением вашей БД (текстовый SQL-скрипт). Его можно хранить как резервную копия вашей БД, из которой потом её можно восстановить
 
 ### 🧹 Шаг 4: Управление Docker-контейнером БД
 

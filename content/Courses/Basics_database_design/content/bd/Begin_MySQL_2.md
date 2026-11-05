@@ -1,4 +1,4 @@
-## Практическое руководство по основам SQL
+## Интерактивная работа с MySQL в изолированном окружении Docker № 2
 
 ### 🔌 Подключение к контейнеру
 
@@ -16,6 +16,29 @@ docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 
 #### 🗄️ Шаг 1: Создание учебной базы данных
 
+Фильтр таблиц для лога
+```sql
+SELECT event_time, command_type, argument
+FROM mysql.general_log
+WHERE user_host LIKE 'root@%'
+ORDER BY event_time DESC;
+```
+и
+```sql
+SELECT event_time, command_type, argument
+FROM mysql.general_log
+WHERE user_host LIKE 'root@%'
+  AND argument NOT LIKE 'SET NAMES%'
+  AND argument NOT LIKE 'SHOW VARIABLES%'
+  AND argument NOT LIKE 'SELECT @@%'
+  AND argument NOT LIKE 'SET SESSION sql_log_off%'  -- на всякий случай
+ORDER BY event_time DESC;
+```
+и
+```sql
+SET SESSION sql_log_off = ON;
+```
+Создаём учебную БД
 ```sql
 CREATE DATABASE sql_practice
   CHARACTER SET utf8mb4
@@ -332,7 +355,7 @@ ORDER BY total_amount DESC;
 
 Подзапрос — это `SELECT`-запрос, вложенный внутрь другого SQL-запроса. Подзапрос выполняется первым, а его результат используется внешним запросом.
 
-Подзапрос в WHERE (с IN)
+Подзапрос в **WHERE** (с IN)
 ```sql
 SELECT name, city
 FROM customers
@@ -344,7 +367,7 @@ WHERE id IN (
 ```
 Вернёт клиентов, у которых есть хотя бы один заказ на сумму больше 1000.
 
-Подзапрос в WHERE (со сравнением)
+Подзапрос в **WHERE** (со сравнением)
 ```sql
 SELECT name, city
 FROM customers
@@ -447,30 +470,28 @@ SELECT * FROM orders WHERE id = 3;
 
 #### 8.4. Создание лога и дампа
 
-Как проверить, что лог пишется
+Все команды записываются в файл `general.log` внутри контейнера.
+
+Проверить это:
 ```shell
 docker exec my-mysql ls -la /var/lib/mysql/general.log
 ```
-Должен быть примерно такой вывод:
-```shell
--rw-r----- 1 mysql mysql 3265 Nov  3 08:46 /var/lib/mysql/general.log
-```
-заглянуть в него:
+Заглянуть в лог:
 ```shell
 docker exec my-mysql cat /var/lib/mysql/general.log
 ```
-забрать лог на хост
+Забрать лог на хост:
 ```shell
 docker cp my-mysql:/var/lib/mysql/general.log ./general.log
 ```
-Очистка лога внутри контейнера
+Очистка лога внутри контейнера:
 ```shell
 docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
 ```
 
-Создание дампа БД (Экспорт в `.sql` файл)
+Создание дампа БД (Экспорт в `.sql` файл на хост для последующего восстановления)
 
-Выйти из БД
+Выйти из БД (на всякий случай)
 ```sql
 \q
 ```

@@ -56,7 +56,7 @@ docker exec my-mysql cat /var/lib/mysql/имя_вашего_хоста.log
 
 Теперь все команды будут записываться в файл `general.log` внутри контейнера автоматически.
 
-Как проверить, что лог пишется
+Проверить, что лог пишется
 ```shell
 docker exec my-mysql ls -la /var/lib/mysql/general.log
 ```
