@@ -607,7 +607,9 @@ head -n 30 dump.sql
 ```shell
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
-выполните:
+Введите пароль `123`. Вы увидите приглашение `mysql>`.
+
+Затем выполните создание пустой БД:
 ```sql
 CREATE DATABASE sql_practice
   CHARACTER SET utf8mb4
@@ -621,7 +623,7 @@ SHOW DATABASES;
 ```sql
 \q
 ```
-Команда импорта выполняется не внутри mysql, а в обычном терминале хоста (с игнорированием ошибок импорта):
+Команда импорта БД из дампа выполняется не внутри mysql, а в обычном терминале хоста (с игнорированием ошибок импорта):
 ```shell
 docker exec -i my-mysql mysql -uroot -p123 --force sql_practice < dump.sql
 ```
@@ -629,7 +631,9 @@ docker exec -i my-mysql mysql -uroot -p123 --force sql_practice < dump.sql
 ```shell
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
-И проверить содержимое восстановленной БД
+Введите пароль `123`. Вы увидите приглашение `mysql>`.
+
+Проверить содержимое восстановленной БД
 ```sql
 SHOW DATABASES;
 USE sql_practice;
