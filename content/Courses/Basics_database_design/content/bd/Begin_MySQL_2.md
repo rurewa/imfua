@@ -28,6 +28,8 @@ docker restart my-mysql
 ```shell
 docker volume prune -a
 ```
+> **docker volume prune -a удаляет все неиспользуемые тома — используйте с осторожностью!**
+
 потом создать новый контейнер
 ```bash
 docker run --name my-mysql \
@@ -49,7 +51,10 @@ docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 Enter password:
 ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)
 ```
-То просто выполните вход в контейнер снова!
+Контейнер ещё инициализируется. Подождите 10–20 секунд и попробуйте подключиться снова:
+```bash
+docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
+```
 
 ---
 
@@ -126,7 +131,7 @@ SHOW FULL TABLES WHERE Table_type = 'VIEW';
 **1.7. Использовать VIEW**
 
 ```sql
-SELECT * FROM my_actions ORDER BY event_time DESC;
+SELECT * FROM my_actions ORDER BY event_time DESC LIMIT 20;
 ```
 
 ---
@@ -166,7 +171,7 @@ DESCRIBE customers;
 DESCRIBE orders;
 ```
 
-Команда `CREATE TABLE customers` создаёт файл `customers.ibd` (для движка InnoDB, который используется по умолчанию). Выйдите из клиента MySQL:
+Команда `CREATE TABLE customers` создаёт файл `customers.ibd` (для InnoDB (движок по умолчанию) CREATE TABLE customers создаёт файл customers.ibd). Выйдите из клиента MySQL:
 
 ```sql
 \q
@@ -642,19 +647,18 @@ LIMIT 10;
 \q
 ```
 
-**12.2. "Экспорт лога в файл на хосте**
+**12.2. Экспорт лога в файл на хосте**
 
 ```shell
-docker exec my-mysql mysql -uroot -p123 -e \
-  "SELECT * FROM sql_practice.my_actions ORDER BY event_time DESC" \
+docker exec -e MYSQL_PWD=123 my-mysql mysql -uroot \
+  --default-character-set=utf8mb4 \
+  -e "SELECT * FROM sql_practice.my_actions ORDER BY event_time DESC" \
   > my_actions_export.txt
 ```
 Посмотреть содержимое my_actions_export.txt:
 ```shell
 cat my_actions_export.txt
 ```
-
-> ⚠️ Если `log_output = 'TABLE'`, файл `general.log` **не обновляется** — он может содержать старые записи или отсутствовать. Для работы с VIEW (раздел 12.1) это нормально.
 
 **12.3. Создание дампа БД**
 
@@ -810,6 +814,7 @@ SELECT * FROM my_actions LIMIT 5;
 | `SHOW FULL TABLES WHERE Table_type = 'VIEW';` | Список только VIEW |
 | `DESCRIBE имя_таблицы;` | Структура таблицы |
 | `SHOW CREATE TABLE имя_таблицы;` | SQL для создания таблицы |
+| `SHOW CREATE VIEW имя_представления;` | SQL для создания VIEW |
 | `EXIT;` или `\q` | Выйти из клиента MySQL |
 | `\G` вместо `;` | Вертикальный вывод строки |
 
