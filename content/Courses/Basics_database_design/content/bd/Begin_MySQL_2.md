@@ -653,11 +653,11 @@ LIMIT 10;
 docker exec -e MYSQL_PWD=123 my-mysql mysql -uroot \
   --default-character-set=utf8mb4 \
   -e "SELECT * FROM sql_practice.my_actions ORDER BY event_time DESC" \
-  > my_actions_export.txt
+  > my_actions_export.log
 ```
-Посмотреть содержимое my_actions_export.txt:
+Посмотреть содержимое `my_actions_export.log`:
 ```shell
-cat my_actions_export.txt
+cat my_actions_export.log
 ```
 
 **12.3. Создание дампа БД**
