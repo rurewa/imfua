@@ -54,7 +54,7 @@ docker run --name my-mysql \
   -e LANG=C.UTF-8 \
   -v mysql_data:/var/lib/mysql \
   -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
-  -d mysql:latest
+  -d mysql:8.0
 ```
 Разберем, что делает эта команда:
 *   `--name my-mysql`: Присваивает контейнеру понятное имя `my-mysql`, чтобы не использовать его **ID**.

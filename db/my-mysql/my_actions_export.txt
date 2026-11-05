@@ -1,0 +1,19 @@
+event_time	command_type	argument
+2026-11-05 08:51:34.914871	Query	SELECT * FROM sql_practice.my_actions ORDER BY event_time DESC
+2026-11-05 08:51:34.914600	Query	select @@version_comment limit 1
+2026-11-05 08:47:01.570698	Query	show tables
+2026-11-05 08:47:01.568804	Query	show databases
+2026-11-05 08:46:57.816171	Query	CREATE DATABASE sql_practice\n  CHARACTER SET utf8mb4\n  COLLATE utf8mb4_unicode_ci
+2026-11-05 08:46:40.264658	Query	select @@version_comment limit 1
+2026-11-05 08:46:35.715668	Query	
+2026-11-05 08:46:35.715610	Query	shutdown
+2026-11-05 08:46:35.694809	Query	DROP DATABASE IF EXISTS test
+2026-11-05 08:46:35.692043	Query	GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION
+2026-11-05 08:46:35.681771	Query	CREATE USER 'root'@'%' IDENTIFIED BY <secret>
+2026-11-05 08:46:35.680399	Query	FLUSH PRIVILEGES
+2026-11-05 08:46:35.679887	Query	GRANT ALL ON *.* TO 'root'@'localhost' WITH GRANT OPTION
+2026-11-05 08:46:35.671671	Query	ALTER USER 'root'@'localhost' IDENTIFIED BY <secret>
+2026-11-05 08:46:35.671474	Query	--  or products like mysql-fabric won't work
+2026-11-05 08:46:35.671398	Query	-- What's done in this file shouldn't be replicated
+2026-11-05 08:46:35.671080	Query	-- enable autocommit explicitly (in case it was disabled globally)
+2026-11-05 08:46:35.670802	Query	select @@version_comment limit 1

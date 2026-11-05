@@ -23,19 +23,33 @@ default-character-set = utf8mb4
 docker restart my-mysql
 ```
 или создаёте новый контейнер, если вы прежний удалили:
+
+желательно удалить старый volume
+```shell
+docker volume prune -a
+```
+потом создать новый контейнер
 ```bash
 docker run --name my-mysql \
   -e MYSQL_ROOT_PASSWORD=123 \
   -e LANG=C.UTF-8 \
+  -e MYSQL_INITDB_SKIP_TZINFO=1 \
   -v mysql_data:/var/lib/mysql \
   -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
-  -d mysql:latest
+  -d mysql:8.0
 ```
 Подключитесь к MySQL в контейнере:
 ```bash
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
 Введите пароль `123`. Вы увидите приглашение `mysql>`.
+
+Если вы после ввода пароля получите эту ошибку:
+```
+Enter password:
+ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)
+```
+То просто выполните вход в контейнер снова!
 
 ---
 
@@ -85,27 +99,21 @@ SHOW TABLES;
 
 ```sql
 CREATE OR REPLACE VIEW my_actions AS
-SELECT event_time, command_type, argument
-FROM mysql.general_log
-WHERE user_host LIKE 'root@%'
-  AND argument NOT LIKE 'SET NAMES%'
-  AND argument NOT LIKE 'SHOW VARIABLES%'
-  AND argument NOT LIKE 'SELECT @@%'
-  AND argument NOT LIKE 'SET SESSION sql_log_off%';
-```
-или
-```sql
-CREATE OR REPLACE VIEW my_actions AS
-SELECT event_time, command_type, argument
+SELECT event_time,
+       command_type,
+       CONVERT(argument USING utf8mb4) AS argument
 FROM mysql.general_log
 WHERE user_host LIKE '%root%'
+  AND command_type = 'Query'
   AND argument NOT LIKE 'SET %'
   AND argument NOT LIKE 'SHOW %'
   AND argument NOT LIKE 'SELECT @@%'
   AND argument NOT LIKE 'SELECT DATABASE()%'
-  AND argument NOT LIKE 'SELECT * FROM my_actions%'   -- исключить самопросмотр
-  AND argument NOT LIKE 'TRUNCATE TABLE mysql.general_log%';
+  AND argument NOT LIKE 'SELECT * FROM my_actions%'
+  AND argument NOT LIKE 'TRUNCATE TABLE mysql.general_log%'
+  AND argument NOT LIKE 'CREATE OR REPLACE VIEW my_actions%';   -- исключить создание самого VIEW
 ```
+Фильтр %root% работает и в MySQL 5.7 (root@localhost), и в MySQL 8.0 (root[root] @ localhost []). Вариант root@% подходит только для 5.7.
 
 > Обратите внимание на `FROM mysql.general_log` — база указана явно. Без этого MySQL искал бы таблицу `general_log` в текущей базе `sql_practice` и выдал бы ошибку.
 
@@ -634,23 +642,16 @@ LIMIT 10;
 \q
 ```
 
-**12.2. Просмотр файла лога (если `log_output = 'TABLE,FILE'` или `'FILE'`)**
+**12.2. "Экспорт лога в файл на хосте**
 
-Проверить, что файл существует:
 ```shell
-docker exec my-mysql ls -la /var/lib/mysql/general.log
+docker exec my-mysql mysql -uroot -p123 -e \
+  "SELECT * FROM sql_practice.my_actions ORDER BY event_time DESC" \
+  > my_actions_export.txt
 ```
-Заглянуть в него:
+Посмотреть содержимое my_actions_export.txt:
 ```shell
-docker exec my-mysql cat /var/lib/mysql/general.log
-```
-Забрать лог на хост:
-```shell
-docker cp my-mysql:/var/lib/mysql/general.log ./general.log
-```
-Очистка лога внутри контейнера:
-```shell
-docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
+cat my_actions_export.txt
 ```
 
 > ⚠️ Если `log_output = 'TABLE'`, файл `general.log` **не обновляется** — он может содержать старые записи или отсутствовать. Для работы с VIEW (раздел 12.1) это нормально.
@@ -702,7 +703,7 @@ DROP TABLE customers;
 SHOW TABLES;
 DROP DATABASE sql_practice;
 ```
-База **my_actions** исчезнет вместе с базой (он там лежал). Проверить:
+**VIEW my_actions** исчезнет вместе с базой sql_practice, потому что был создан в ней. Проверить:
 ```sql
 SHOW DATABASES;
 ```
