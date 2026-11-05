@@ -26,11 +26,12 @@
   - [Подробные уроки по Docker для начинающих](https://gitflic.ru/project/rurewa/altlinux/blob?file=content%2FDocker%2FDocker.md&branch=master&mode=markdown)
   - [Работа с базой данных внутри контейнера](/content/Basics_database_design/db_base.md)
 - Базы Данных
-  - [Интерактивная работа с MySQL в изолированном окружении Docker](/content/Courses/Basics_database_design/content/Content/MySQL.md)
+  - [Интерактивная работа с MySQL в изолированном окружении Docker № 1](/content/Courses/Basics_database_design/content/bd/Begin_MySQL_1.md)
+  - [Интерактивная работа с MySQL в изолированном окружении Docker № 2](/content/Courses/Basics_database_design/content/bd/Begin_MySQL_2.md)
   - [Основные операции на примере двух таблиц «products 1» и «products 2»](/content/Courses/Basics_database_design/content/bd/Products.md)
   - [Руководство по представлениям (VIEW) в MySQL](/content/Courses/Basics_database_design/content/bd/VIEW_MySQL.md)
   - [Нормализация данных. Практическое руководство 1](/content/Courses/Basics_database_design/content/bd/Normalization_1.md)
-  - [Лабораторная работа по нормализации данных в БД](/content/Courses/Basics_database_design/content/bd/Normalization_2.md)
+  - [Лабораторная работа по нормализации данных в БД - 2](/content/Courses/Basics_database_design/content/bd/Normalization_2.md)
 
 ***
 
