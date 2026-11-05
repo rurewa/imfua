@@ -47,14 +47,6 @@ default-character-set = utf8mb4
 [mysql]
 default-character-set = utf8mb4
 ```
-В каталоге `my-mysql` создайте папку `logs` для логов ???
-```shell
-mkdir -p logs
-```
-создать файл `general.log` для ведения лога (журнала) действий в БД ???
-```shell
-touch general.log
-```
 Контейнер с официального образа **MySQL**:
 ```bash
 docker run --name my-mysql \
