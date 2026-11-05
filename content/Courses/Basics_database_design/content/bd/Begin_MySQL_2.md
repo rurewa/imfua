@@ -18,11 +18,20 @@ default-character-set = utf8mb4
 [mysql]
 default-character-set = utf8mb4
 ```
-после замены my.cnf перезапустить контейнер, чтобы настройки применились:
+после замены `my.cnf` перезапустить контейнер, чтобы настройки применились:
 ```shell
 docker restart my-mysql
 ```
-Подключитесь к MySQL:
+или создаёте новый контейнер, если вы прежний удалили:
+```bash
+docker run --name my-mysql \
+  -e MYSQL_ROOT_PASSWORD=123 \
+  -e LANG=C.UTF-8 \
+  -v mysql_data:/var/lib/mysql \
+  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
+  -d mysql:latest
+```
+Подключитесь к MySQL в контейнере:
 ```bash
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
@@ -83,6 +92,19 @@ WHERE user_host LIKE 'root@%'
   AND argument NOT LIKE 'SHOW VARIABLES%'
   AND argument NOT LIKE 'SELECT @@%'
   AND argument NOT LIKE 'SET SESSION sql_log_off%';
+```
+или
+```sql
+CREATE OR REPLACE VIEW my_actions AS
+SELECT event_time, command_type, argument
+FROM mysql.general_log
+WHERE user_host LIKE '%root%'
+  AND argument NOT LIKE 'SET %'
+  AND argument NOT LIKE 'SHOW %'
+  AND argument NOT LIKE 'SELECT @@%'
+  AND argument NOT LIKE 'SELECT DATABASE()%'
+  AND argument NOT LIKE 'SELECT * FROM my_actions%'   -- исключить самопросмотр
+  AND argument NOT LIKE 'TRUNCATE TABLE mysql.general_log%';
 ```
 
 > Обратите внимание на `FROM mysql.general_log` — база указана явно. Без этого MySQL искал бы таблицу `general_log` в текущей базе `sql_practice` и выдал бы ошибку.
@@ -159,30 +181,22 @@ orders.ibd
 #### ✍️ Шаг 3: Вставка данных (INSERT)
 
 Вернитесь в клиент MySQL:
-
 ```shell
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
-
 Выберите базу:
-
 ```sql
 USE sql_practice;
 ```
-
 Покажите таблицы:
-
 ```sql
 SHOW TABLES;
 ```
-
 Проверьте, что таблицы пусты:
-
 ```sql
 SELECT * FROM customers;
 SELECT * FROM orders;
 ```
-
 Вставьте данные:
 
 ```sql
@@ -338,7 +352,6 @@ INNER JOIN orders o ON c.id = o.customer_id;
 **JOIN** — это оператор, который соединяет строки из двух или более таблиц на основе общего столбца (обычно это первичный ключ одной таблицы и внешний ключ другой). Без JOIN работать с реляционными базами данных практически невозможно: данные намеренно разнесены по таблицам, чтобы избежать дублирования.
 
 Алиасы в SQL:
-
 ```sql
 FROM customers c
 JOIN orders o ON c.id = o.customer_id;
@@ -357,13 +370,10 @@ JOIN orders o ON c.id = o.customer_id;
 SELECT id FROM customers JOIN orders ON ...;
 ```
 вернёт ошибку:
-
 ```sql
 ERROR 1052 (23000): Column 'id' in field list is ambiguous
 ```
-
 т.к. MySQL не знает, какой `id` имеется в виду — из `customers` или из `orders`. С алиасом всё однозначно:
-
 ```sql
 SELECT c.id, o.id FROM customers c JOIN orders o ON c.id = o.customer_id;
 ```
