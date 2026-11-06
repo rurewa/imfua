@@ -26,6 +26,7 @@ default-character-set = utf8mb4
 [mysql]
 default-character-set = utf8mb4
 ```
+Переносы строк в `my.cnf`. Если файл был создан в **Блокноте** Windows, в нём могут оказаться **CRLF**-переносы. **MySQL** обычно это терпит, но если контейнер падает при старте — первым делом проверьте кодировку и переносы (лучше сохранить файл в **UTF-8** без BOM и с LF). Или создавать этот проект в Ubuntu WSL - в линуксах с этим проблем нет.
 
 **Если контейнер `my-mysql` уже создан** — перезапустите его, чтобы настройки применились:
 
@@ -63,6 +64,7 @@ docker volume prune -a
 
 ### 1.4. Создать новый контейнер с MySQL
 
+Git-Bash
 ```shell
 docker run --name my-mysql \
   -e MYSQL_ROOT_PASSWORD=123 \
@@ -70,6 +72,16 @@ docker run --name my-mysql \
   -e MYSQL_INITDB_SKIP_TZINFO=1 \
   -v mysql_data:/var/lib/mysql \
   -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
+  -d mysql:8.0
+```
+Windows PowerShell
+```shell
+docker run --name my-mysql `
+  -e MYSQL_ROOT_PASSWORD=123 `
+  -e LANG=C.UTF-8 `
+  -e MYSQL_INITDB_SKIP_TZINFO=1 `
+  -v mysql_data:/var/lib/mysql `
+  -v ${PWD}/my.cnf:/etc/mysql/conf.d/my.cnf `
   -d mysql:8.0
 ```
 Разберём опции:
