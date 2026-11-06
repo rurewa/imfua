@@ -2,12 +2,17 @@
 
 Представление — это **сохранённый SQL-запрос, который выглядит как таблица**. Вы обращаетесь к нему по имени, как к обычной таблице, но данных он не хранит — при каждом обращении запрос выполняется заново.
 
-[Подробней о представлениях VIEW](/content/Courses/Basics_database_design/content/Docs/)
+[Подробней о представлениях VIEW](/content/Courses/Basics_database_design/content/Docs/VIEW.md)
 
 > **Работу можно выполнять в созданном ранее каталоге `my-mysql`, в котором уже есть файл `my.cnf`**
 
-Замените старое файла содержимое файла `my.cnf` на это:
-```shell
+---
+
+## 🔹 0. Настройка `my.cnf`
+
+Замените содержимое файла `my.cnf` на это:
+
+```ini
 [mysqld]
 character-set-server = utf8mb4
 collation-server = utf8mb4_unicode_ci
@@ -21,15 +26,149 @@ default-character-set = utf8mb4
 [mysql]
 default-character-set = utf8mb4
 ```
-после замены `my.cnf` перезапустить контейнер, чтобы настройки применились:
+
+**Если контейнер `my-mysql` уже создан** — перезапустите его, чтобы настройки применились:
+
 ```shell
 docker restart my-mysql
 ```
 
+**Если контейнера нет** — переходите к разделу 1, где описано создание с нуля.
+
 ---
 
-## 🔹 1. Зачем нужны представления
+## 🔹 1. Подготовка: создание контейнера с нуля
 
+Если вы начинаете «с чистого листа» — выполните эти шаги. Если контейнер уже есть и вы обновили `my.cnf` — переходите к разделу 2.
+
+### 1.1. Получить список текущих контейнеров
+
+```shell
+docker ps -a
+```
+
+### 1.2. Остановить и удалить **только учебный** контейнер
+
+```shell
+docker stop my-mysql имя_контейнера
+docker rm my-mysql имя_контейнера
+```
+
+`2>/dev/null` подавляет ошибку, если контейнера ещё нет.
+
+### 1.3. Удалить volume учебных проектов
+
+```shell
+docker volume prune -a
+```
+> ⚠️ * — эта команда удаляет **все** неиспользуемые volumes на хосте, а не только `mysql_data`. Если у вас есть другие важные контейнеры и volumes — они пострадают.
+
+### 1.4. Создать новый контейнер с MySQL
+
+```shell
+docker run --name my-mysql \
+  -e MYSQL_ROOT_PASSWORD=123 \
+  -e LANG=C.UTF-8 \
+  -e MYSQL_INITDB_SKIP_TZINFO=1 \
+  -v mysql_data:/var/lib/mysql \
+  -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
+  -d mysql:8.0
+```
+
+Разберём опции:
+
+| Опция | Зачем |
+|-------|-------|
+| `--name my-mysql` | Понятное имя контейнера |
+| `-e MYSQL_ROOT_PASSWORD=123` | Пароль пользователя `root` (в учебных целях — `123`) |
+| `-e LANG=C.UTF-8` | UTF-8 локаль для корректной работы с кириллицей |
+| `-e MYSQL_INITDB_SKIP_TZINFO=1` | Отключает автоматическую загрузку данных о часовых поясах. Ускоряет первый запуск и не засоряет лог тысячами `INSERT INTO time_zone_*` |
+| `-v mysql_data:/var/lib/mysql` | Volume для хранения данных — сохраняются между перезапусками |
+| `-v $(pwd)/my.cnf:...` | Монтирует ваш `my.cnf` с настройками кодировки и логирования |
+| `-d mysql:8.0` | LTS-версия MySQL, стабильная и предсказуемая |
+
+### 1.5. Подключиться к MySQL
+
+```shell
+docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
+```
+Введите пароль `123`. Вы увидите приглашение `mysql>`.
+
+> ⚠️ Если сразу после запуска контейнера вы получите ошибку `ERROR 2002 (HY000): Can't connect to local MySQL server through socket...`, подождите 10–20 секунд (контейнер ещё инициализируется) и попробуйте подключиться снова.
+
+---
+
+## 🔹 2. Создание базы данных и таблиц
+
+Все команды выполняются **внутри клиента MySQL** (после приглашения `mysql>`).
+
+### 2.1. Создать учебную БД
+
+```sql
+CREATE DATABASE sql_practice
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+```
+
+### 2.2. Переключиться на неё
+
+```sql
+USE sql_practice;
+```
+
+### 2.3. Создать таблицы `customers` и `orders`
+
+```sql
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    city VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    order_date DATE NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(20) DEFAULT 'new',
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### 2.4. Заполнить таблицы данными
+
+```sql
+INSERT INTO customers (name, email, city) VALUES
+  ('Иван Иванов', 'ivan@example.com', 'Москва'),
+  ('Пётр Петров', 'petr@example.com', 'Санкт-Петербург'),
+  ('Мария Сидорова', 'maria@example.com', 'Москва'),
+  ('Алексей Смирнов', 'alex@example.com', 'Казань'),
+  ('Ольга Кузнецова', 'olga@example.com', 'Новосибирск');
+
+INSERT INTO orders (customer_id, order_date, amount, status) VALUES
+  (1, '2026-10-01', 1500.00, 'paid'),
+  (1, '2026-10-05', 2300.50, 'paid'),
+  (2, '2026-10-03', 800.00, 'new'),
+  (3, '2026-10-07', 4200.00, 'paid'),
+  (3, '2026-10-10', 1100.00, 'cancelled'),
+  (4, '2026-10-12', 950.00, 'new');
+```
+
+### 2.5. Проверить
+
+```sql
+SHOW TABLES;
+SELECT * FROM customers;
+SELECT * FROM orders;
+```
+
+Должны быть две таблицы (`customers`, `orders`) и данные в них.
+
+---
+
+## 🔹 3. Зачем нужны представления
 | Задача | Как помогает **VIEW** |
 |--------|-------------------|
 | Упростить сложные запросы | Пишете `SELECT * FROM my_view` вместо трёхэтажного `JOIN` |
@@ -38,21 +177,10 @@ docker restart my-mysql
 | Переиспользовать логику | Один раз определили — используете везде |
 | Абстракция | При изменении таблиц приложение продолжает работать |
 
----
-
-## 🔹 2. Подготовка (если ещё не сделано)
-
-Используем базу `sql_practice` из [примера](/content/Courses/Basics_database_design/content/bd/Begin_MySQL_2.md). Проверьте, что она есть и в ней есть таблицы:
-```sql
-SHOW DATABASES;
-USE sql_practice;
-SHOW TABLES;
-```
-Должны быть таблицы `customers` и `orders`. Если их нет — создайте их и заполните данными.
 
 ---
 
-## 🔹 3. Простейшее представление
+## 🔹 4. Простейшее представление
 
 **Задача:** часто нужен список клиентов из Москвы.
 
@@ -71,22 +199,20 @@ WHERE city = 'Москва';
 ```sql
 SELECT * FROM moscow_customers;
 ```
-
 **Результат:**
-
 | id | name | email |
 |----|------|-------|
 | 1 | Иван Иванов | ivan@example.com |
 | 3 | Мария Сидорова | maria@example.com |
 
+
 **Ключевая мысль:** данные не скопированы. При каждом `SELECT * FROM moscow_customers` MySQL **заново выполняет** запрос `SELECT ... WHERE city = 'Москва'`. Если добавите нового клиента из Москвы в `customers` — он **сразу появится** в представлении.
 
 ---
 
-## 🔹 4. VIEW с JOIN и агрегацией
+## 🔹 5. VIEW с JOIN и агрегацией
 
 **Задача:** сводка по клиентам — сколько заказов и на какую сумму.
-
 ```sql
 CREATE VIEW customer_summary AS
 SELECT c.id,
@@ -98,9 +224,7 @@ FROM customers c
 LEFT JOIN orders o ON c.id = o.customer_id
 GROUP BY c.id, c.name, c.city;
 ```
-
 Использование:
-
 ```sql
 SELECT * FROM customer_summary ORDER BY total_amount DESC;
 ```
@@ -115,27 +239,25 @@ SELECT * FROM customer_summary ORDER BY total_amount DESC;
 | 2 | Пётр Петров | Санкт-Петербург | 1 | 800.00 |
 | 5 | Ольга Кузнецова | Новосибирск | 0 | 0.00 |
 
-Теперь вместо сложного `JOIN` с `GROUP BY` достаточно одной строки:
 
+Теперь вместо сложного `JOIN` с `GROUP BY` достаточно одной строки:
 ```sql
 SELECT name, total_amount FROM customer_summary WHERE total_amount > 2000;
 ```
 
 ---
 
-## 🔹 5. VIEW с фильтрацией внутри
+## 🔹 6. VIEW с фильтрацией внутри
 
 Можно комбинировать **VIEW** с дополнительным `WHERE` снаружи:
-
 ```sql
 SELECT * FROM customer_summary WHERE city = 'Москва';
 ```
-
-MySQL «завернёт» ваш `WHERE` внутрь запроса представления. Это работает, но **не всегда эффективно** — см. раздел 9.
+MySQL «завернёт» ваш `WHERE` внутрь запроса представления. Это работает, но **не всегда эффективно** — см. раздел 10.
 
 ---
 
-## 🔹 6. Просмотр существующих VIEW
+## 🔹 7. Просмотр существующих VIEW
 
 ```sql
 SHOW FULL TABLES WHERE Table_type = 'VIEW';
@@ -165,7 +287,7 @@ SHOW CREATE VIEW customer_summary\G
 
 ---
 
-## 🔹 7. Изменение и удаление VIEW
+## 🔹 8. Изменение и удаление VIEW
 
 ### Изменить существующее представление
 
@@ -173,14 +295,14 @@ SHOW CREATE VIEW customer_summary\G
 ```sql
 SELECT * FROM moscow_customers;
 ```
-и выполнить запрос изменения
+И выполнить запрос изменения:
 ```sql
 CREATE OR REPLACE VIEW moscow_customers AS
 SELECT id, name, email, created_at
 FROM customers
 WHERE city = 'Москва';
 ```
-`CREATE OR REPLACE` перезаписывае старое определение новым, не удаляя **VIEW**.
+`CREATE OR REPLACE` перезаписывает старое определение новым, не удаляя **VIEW**.
 
 Получить результат:
 ```sql
@@ -203,7 +325,7 @@ SHOW TABLES;
 
 ---
 
-## 🔹 8. Обновляемые VIEW (UPDATE, INSERT, DELETE)
+## 🔹 9. Обновляемые VIEW (UPDATE, INSERT, DELETE)
 
 **Не все VIEW можно обновлять.** Представление обновляемо, если MySQL может однозначно сопоставить строку VIEW со строкой базовой таблицы.
 
@@ -215,19 +337,17 @@ SELECT id, name, email, city
 FROM customers
 WHERE city IS NOT NULL;
 ```
-
 Можно:
-
 ```sql
 UPDATE active_customers SET city = 'Сочи' WHERE id = 2;
 SELECT * FROM customers WHERE id = 2;  -- city действительно изменился
 ```
-
+и
 ```sql
 INSERT INTO active_customers (name, email, city)
 VALUES ('Новый Клиент', 'new@example.com', 'Уфа');
 ```
-
+и
 ```sql
 DELETE FROM active_customers WHERE id = 6;
 ```
@@ -249,14 +369,13 @@ UPDATE customer_summary SET name = 'X' WHERE id = 1;
 ```
 ERROR 1288 (HY000): The target table customer_summary of the UPDATE is not updatable
 ```
-
 **Почему:** `COUNT(o.id)` — это агрегат, его нельзя «разложить обратно» на строки таблицы. MySQL не знает, какую строку `customers` менять.
 
 **Правило:** VIEW с `GROUP BY`, `DISTINCT`, `UNION`, агрегатами, `JOIN` (часто) — **необновляемы**.
 
 ---
 
-## 🔹 9. VIEW и производительность
+## 🔹 10. VIEW и производительность
 
 **Важно понимать:** VIEW — это **не материализованное представление**. Он не хранит данные и не имеет индексов. При каждом обращении MySQL выполняет **весь запрос заново**.
 
@@ -266,6 +385,7 @@ ERROR 1288 (HY000): The target table customer_summary of the UPDATE is not updat
 SELECT * FROM customer_summary WHERE city = 'Москва';
 ```
 MySQL **не** сначала считает всю сводку, а потом фильтрует. Он «вставляет» ваш `WHERE` внутрь запроса и пытается оптимизировать. Иногда получается хорошо, иногда — нет.
+
 **Проверить план:**
 ```sql
 EXPLAIN SELECT * FROM customer_summary WHERE city = 'Москва';
@@ -278,7 +398,7 @@ EXPLAIN SELECT * FROM customer_summary WHERE city = 'Москва';
 
 ---
 
-## 🔹 10. VIEW с проверкой опций (WITH CHECK OPTION)
+## 🔹 11. VIEW с проверкой опций (WITH CHECK OPTION)
 
 По умолчанию через **VIEW** можно вставить строку, которая **не попадёт** в его фильтр:
 
@@ -304,7 +424,7 @@ INSERT INTO moscow_customers (name, city) VALUES ('Пётр', 'Казань');
 
 ---
 
-## 🔹 11. Права доступа через VIEW
+## 🔹 12. Права доступа через VIEW
 
 Частый сценарий: скрыть от пользователя столбец `email`.
 
@@ -319,9 +439,11 @@ GRANT SELECT ON sql_practice.public_customers TO 'analyst'@'%';
 ```
 Теперь `analyst` видит `public_customers` без email, но не может обратиться к `customers` напрямую.
 
-## 🔹 12. Создание дампа
+---
 
-Выйти из БД
+## 🔹 13. Создание дампа
+
+Выйти из БД:
 ```sql
 \q
 ```
@@ -329,45 +451,45 @@ GRANT SELECT ON sql_practice.public_customers TO 'analyst'@'%';
 ```shell
 docker exec my-mysql mysqldump -uroot -p123 sql_practice > dump.sql
 ```
-или
+Или без предупреждения о пароле в командной строке:
 ```shell
 docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot sql_practice > dump.sql
 ```
-после чего в папке `my-mysql` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой
+После чего в папке `my-mysql` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой:
 ```shell
 cat dump.sql
 ```
-`.sql` файл является текстовым представлением вашей БД (текстовый SQL-скрипт). Его можно хранить как резервную копию вашей БД, из которой потом её можно восстановить
+`.sql` файл является текстовым представлением вашей БД (текстовый SQL-скрипт). Его можно хранить как резервную копию вашей БД, из которой потом её можно восстановить.
 
-По умолчанию **VIEW** включаются в дамп. Когда вы выполняете стандартную команду `mysqldump`, утилита по умолчанию включает в выходной файл не только таблицы, но и определения всех представлений
+По умолчанию **VIEW** включаются в дамп. Когда вы выполняете стандартную команду `mysqldump`, утилита по умолчанию включает в выходной файл не только таблицы, но и определения всех представлений.
 
-## 🔹 13. Создание лога действий пользователя
+---
+
+## 🔹 14. Создание лога действий пользователя
 
 MySQL может записывать все команды, которые выполняются в базе. Это полезно для отладки и анализа: видно, какие запросы отправлял пользователь.
 
 **Самый простой способ — файловый лог.** Не нужно создавать дополнительные таблицы или представления.
 
-### 13.1. Включить лог
+### 14.1. Проверить, что лог включён
 
-Выполните в клиенте MySQL:
+В `my.cnf` уже прописаны `general_log = 1` и `log_output = FILE`, поэтому после перезапуска контейнера лог должен быть активен. Проверьте в клиенте MySQL:
 
-```sql
-SET GLOBAL general_log = 'ON';
-SET GLOBAL log_output = 'FILE';
-```
-Если вы уже заменили `my.cnf` и перезапустили контейнер, эти настройки уже активны. Команды `SET GLOBAL` можно выполнить для проверки.
-
-Проверьте, что настройки применились:
 ```sql
 SHOW VARIABLES LIKE 'general_log%';
 SHOW VARIABLES LIKE 'log_output';
 ```
 Должно быть **general_log = ON**, **log_output = FILE**.
 
+Если по какой-то причине лог выключен — включите вручную:
+```sql
+SET GLOBAL general_log = 'ON';
+SET GLOBAL log_output = 'FILE';
+```
 
-### 13.2. Где находится лог
+### 14.2. Где находится лог
 
-Файл лога лежит внутри контейнера по пути /var/lib/mysql/general.log.
+Файл лога лежит внутри контейнера по пути `/var/lib/mysql/general.log`.
 
 Проверить, что файл существует:
 ```shell
@@ -382,23 +504,23 @@ docker exec my-mysql cat /var/lib/mysql/general.log
 docker cp my-mysql:/var/lib/mysql/general.log ./general.log
 ```
 
-### 13.3. Отфильтровать только свои действия
+### 14.3. Отфильтровать только свои действия
 
-В логе много служебных записей (Connect, Quit, SET NAMES, SHOW VARIABLES и т.п.). Отфильтровать их можно одной командой на хосте:
+В логе много служебных записей (`Connect`, `Quit`, `SET NAMES`, `SHOW VARIABLES` и т.п.). Отфильтровать их можно одной командой на хосте:
 ```shell
 docker exec my-mysql cat /var/lib/mysql/general.log \
   | grep "Query" \
   | grep -v -E "SET NAMES|SET autocommit|SET sql_mode|SET character_set_results|SHOW VARIABLES|SHOW STATUS|SHOW WARNINGS|SELECT @@|SELECT DATABASE\(\)|time_zone" \
   > my_actions.log
 ```
-Теперь в файле my_actions.log — только ваши осмысленные SQL-команды.
+Теперь в файле `my_actions.log` — только ваши осмысленные SQL-команды.
 
 Проверить:
 ```shell
 cat my_actions.log
 ```
 
-### 13.4. Очистить лог
+### 14.4. Очистить лог
 
 Если хотите начать с чистого листа (не обязательно):
 ```shell
@@ -406,9 +528,11 @@ docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
 ```
 Файл обнулится, но останется на месте. MySQL продолжит в него писать.
 
+Результат оформить в виде отдельного `README.md` и дампом и логом (лог-файл должен содержать минимум служебных записей) в этой же папке
+
 ---
 
-## 🔹 14. Шпаргалка по командам
+## 🔹 15. Шпаргалка по командам
 
 | Действие | Команда |
 |----------|---------|
@@ -425,7 +549,7 @@ docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
 
 ---
 
-## 🔹 15. Типичные ошибки
+## 🔹 16. Типичные ошибки
 
 | Ошибка | Причина | Решение |
 |--------|---------|---------|
@@ -434,10 +558,11 @@ docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
 | `CHECK OPTION failed` | Вставка нарушает `WHERE` в VIEW | Не вставлять или убрать `WITH CHECK OPTION` |
 | `Unknown table 'x'` | VIEW не существует или не выбрана база | `SHOW FULL TABLES WHERE Table_type = 'VIEW';` |
 | VIEW работает медленно | Сложный запрос внутри | `EXPLAIN`, упростить VIEW |
+| `ERROR 2002 ... Can't connect ... socket` | Контейнер ещё инициализируется | Подождать 10–20 секунд и подключиться снова |
 
 ---
 
-## 🔹 16. Полный пример «с нуля»
+## 🔹 17. Полный пример «с нуля» (для наглядности)
 
 ```sql
 USE sql_practice;
