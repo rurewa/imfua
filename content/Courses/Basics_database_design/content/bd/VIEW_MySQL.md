@@ -2,6 +2,28 @@
 
 Представление — это **сохранённый SQL-запрос, который выглядит как таблица**. Вы обращаетесь к нему по имени, как к обычной таблице, но данных он не хранит — при каждом обращении запрос выполняется заново.
 
+> **Работу можно выполнять в созданном ранее каталоге `my-mysql`, в котором уже есть файл `my.cnf`**
+
+Замените старое файла содержимое файла `my.cnf` на это:
+```shell
+[mysqld]
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+general_log = 1
+general_log_file = /var/lib/mysql/general.log
+log_output = FILE
+
+[client]
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4
+```
+после замены `my.cnf` перезапустить контейнер, чтобы настройки применились:
+```shell
+docker restart my-mysql
+```
+
 ---
 
 ## 🔹 1. Зачем нужны представления
@@ -157,7 +179,7 @@ SELECT id, name, email, created_at
 FROM customers
 WHERE city = 'Москва';
 ```
-`CREATE OR REPLACE` перезаписываеDROP VIEW IF EXISTS moscow_customers;т старое определение новым, не удаляя VIEW.
+`CREATE OR REPLACE` перезаписывае старое определение новым, не удаляя **VIEW**.
 
 Получить результат:
 ```sql
@@ -314,13 +336,78 @@ docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot sql_practice > dump.sql
 ```shell
 cat dump.sql
 ```
-`.sql` файл является текстовым представлением вашей БД (текстовый SQL-скрипт). Его можно хранить как резервную копия вашей БД, из которой потом её можно восстановить
+`.sql` файл является текстовым представлением вашей БД (текстовый SQL-скрипт). Его можно хранить как резервную копию вашей БД, из которой потом её можно восстановить
 
 По умолчанию **VIEW** включаются в дамп. Когда вы выполняете стандартную команду `mysqldump`, утилита по умолчанию включает в выходной файл не только таблицы, но и определения всех представлений
 
+## 🔹 13. Создание лога действий пользователя
+
+MySQL может записывать все команды, которые выполняются в базе. Это полезно для отладки и анализа: видно, какие запросы отправлял пользователь.
+
+**Самый простой способ — файловый лог.** Не нужно создавать дополнительные таблицы или представления.
+
+### 13.1. Включить лог
+
+Выполните в клиенте MySQL:
+
+```sql
+SET GLOBAL general_log = 'ON';
+SET GLOBAL log_output = 'FILE';
+```
+Если вы уже заменили `my.cnf` и перезапустили контейнер, эти настройки уже активны. Команды `SET GLOBAL` можно выполнить для проверки.
+
+Проверьте, что настройки применились:
+```sql
+SHOW VARIABLES LIKE 'general_log%';
+SHOW VARIABLES LIKE 'log_output';
+```
+Должно быть **general_log = ON**, **log_output = FILE**.
+
+
+### 13.2. Где находится лог
+
+Файл лога лежит внутри контейнера по пути /var/lib/mysql/general.log.
+
+Проверить, что файл существует:
+```shell
+docker exec my-mysql ls -la /var/lib/mysql/general.log
+```
+Заглянуть в него:
+```shell
+docker exec my-mysql cat /var/lib/mysql/general.log
+```
+Забрать лог на хост:
+```shell
+docker cp my-mysql:/var/lib/mysql/general.log ./general.log
+```
+
+### 13.3. Отфильтровать только свои действия
+
+В логе много служебных записей (Connect, Quit, SET NAMES, SHOW VARIABLES и т.п.). Отфильтровать их можно одной командой на хосте:
+```shell
+docker exec my-mysql cat /var/lib/mysql/general.log \
+  | grep "Query" \
+  | grep -v -E "SET NAMES|SET autocommit|SET sql_mode|SET character_set_results|SHOW VARIABLES|SHOW STATUS|SHOW WARNINGS|SELECT @@|SELECT DATABASE\(\)|time_zone" \
+  > my_actions.log
+```
+Теперь в файле my_actions.log — только ваши осмысленные SQL-команды.
+
+Проверить:
+```shell
+cat my_actions.log
+```
+
+### 13.4. Очистить лог
+
+Если хотите начать с чистого листа (не обязательно):
+```shell
+docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
+```
+Файл обнулится, но останется на месте. MySQL продолжит в него писать.
+
 ---
 
-## 🔹 13. Шпаргалка по командам
+## 🔹 14. Шпаргалка по командам
 
 | Действие | Команда |
 |----------|---------|
@@ -337,7 +424,7 @@ cat dump.sql
 
 ---
 
-## 🔹 14. Типичные ошибки
+## 🔹 15. Типичные ошибки
 
 | Ошибка | Причина | Решение |
 |--------|---------|---------|
@@ -349,7 +436,7 @@ cat dump.sql
 
 ---
 
-## 🔹 15. Полный пример «с нуля»
+## 🔹 16. Полный пример «с нуля»
 
 ```sql
 USE sql_practice;
