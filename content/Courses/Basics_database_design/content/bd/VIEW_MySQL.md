@@ -50,11 +50,9 @@ docker ps -a
 ### 1.2. Остановить и удалить **только учебный** контейнер
 
 ```shell
-docker stop my-mysql имя_контейнера
-docker rm my-mysql имя_контейнера
+docker stop my-mysql
+docker rm my-mysql
 ```
-
-`2>/dev/null` подавляет ошибку, если контейнера ещё нет.
 
 ### 1.3. Удалить volume учебных проектов
 
@@ -74,7 +72,6 @@ docker run --name my-mysql \
   -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
   -d mysql:8.0
 ```
-
 Разберём опции:
 
 | Опция | Зачем |
@@ -89,6 +86,11 @@ docker run --name my-mysql \
 
 ### 1.5. Подключиться к MySQL
 
+Убедиться, что контейнер с БД существует и запущен (Up)
+```shell
+docker ps -a
+```
+Подключиться к БД в контейнере
 ```shell
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
