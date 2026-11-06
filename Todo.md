@@ -132,15 +132,19 @@
 - Основы Bash-скриптинга +
 - Основы Git +
 - Ubuntu WSL +
-- Docker
-- Docker - установили LLM Ollama
+- Docker - установили LLM Ollama ?
 - Самостоятельные работы:
     - README.md с Markdown + Mermaid
     - Скриптование на Bash +
     - Статический сайт на Github Pages +
-    - Командная работа на Github Pages
+    - Командная работа на Github Pages +
+- Docker
+    - Просмотр видеоролика
+    - hello-world
+    - Congratulation
 
-Отличники: Лузянин (), Сухинин (),
+
+Отличники: Лузянин (), Сухинин (), Трубин (), Ремизов (),
 
 06.11 8482 Технология разработки БД
 
