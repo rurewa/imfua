@@ -2,6 +2,8 @@
 
 Представление — это **сохранённый SQL-запрос, который выглядит как таблица**. Вы обращаетесь к нему по имени, как к обычной таблице, но данных он не хранит — при каждом обращении запрос выполняется заново.
 
+[Подробней о представлениях VIEW](/content/Courses/Basics_database_design/content/Docs/)
+
 > **Работу можно выполнять в созданном ранее каталоге `my-mysql`, в котором уже есть файл `my.cnf`**
 
 Замените старое файла содержимое файла `my.cnf` на это:
@@ -40,14 +42,13 @@ docker restart my-mysql
 
 ## 🔹 2. Подготовка (если ещё не сделано)
 
-Используем базу `sql_practice` из предыдущих примеров. Проверьте, что она есть:
+Используем базу `sql_practice` из [примера](/content/Courses/Basics_database_design/content/bd/Begin_MySQL_2.md). Проверьте, что она есть и в ней есть таблицы:
 ```sql
 SHOW DATABASES;
 USE sql_practice;
 SHOW TABLES;
 ```
-
-Должны быть таблицы `customers` и `orders`. Если их нет — [создайте](/content/Courses/Basics_database_design/content/bd/MySQL.md).
+Должны быть таблицы `customers` и `orders`. Если их нет — создайте их и заполните данными.
 
 ---
 

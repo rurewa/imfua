@@ -15,6 +15,7 @@
 - [Понятие кортежа в БД](/content/Courses/Basics_database_design/content/Docs/tuple.md)
 - [Файлы БД](/content/Courses/Basics_database_design/content/Docs/SQL_File.md)
 - [Нормализация данных: простое руководство с примерами](/content/Courses/Basics_database_design/content/Docs/data_normalization.md)
+- [Представления (VIEW) в MySQL: подробное руководство](/content/Courses/Basics_database_design/content/Docs/VIEW.md)
 - [Лог MySQL](/content/Courses/Basics_database_design/content/Docs/log.md)
 - [Основные движки MySQL и их назначение](/content/Courses/Basics_database_design/content/Docs/storage_engine.md)
 - [Краткий обзор движков таблиц MySQL](https://habr.com/ru/articles/64851/)
