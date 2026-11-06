@@ -90,6 +90,10 @@ docker run --name my-mysql \
 ```shell
 docker ps -a
 ```
+Перед началом работы (сразу после создания контейнера) очистить лог:
+```shell
+docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
+```
 Подключиться к БД в контейнере
 ```shell
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
@@ -165,7 +169,6 @@ SHOW TABLES;
 SELECT * FROM customers;
 SELECT * FROM orders;
 ```
-
 Должны быть две таблицы (`customers`, `orders`) и данные в них.
 
 ---
@@ -202,6 +205,7 @@ WHERE city = 'Москва';
 SELECT * FROM moscow_customers;
 ```
 **Результат:**
+
 | id | name | email |
 |----|------|-------|
 | 1 | Иван Иванов | ivan@example.com |
@@ -230,7 +234,6 @@ GROUP BY c.id, c.name, c.city;
 ```sql
 SELECT * FROM customer_summary ORDER BY total_amount DESC;
 ```
-
 **Результат:**
 
 | id | name | city | order_count | total_amount |
@@ -402,27 +405,49 @@ EXPLAIN SELECT * FROM customer_summary WHERE city = 'Москва';
 
 ## 🔹 11. VIEW с проверкой опций (WITH CHECK OPTION)
 
-По умолчанию через **VIEW** можно вставить строку, которая **не попадёт** в его фильтр:
-
+Без WITH CHECK OPTION — строка вставляется, но через VIEW не видна
 ```sql
-CREATE VIEW moscow_customers AS
-SELECT id, name, city FROM customers WHERE city = 'Москва';
-
-INSERT INTO moscow_customers (name, city) VALUES ('Пётр', 'Казань');
--- Строка вставится в customers, но через VIEW её не будет видно!
+-- Пересоздаём VIEW с email (обязательный столбец)
+CREATE OR REPLACE VIEW moscow_customers AS
+SELECT id, name, email, city
+FROM customers
+WHERE city = 'Москва';
 ```
-Чтобы запретить такие вставки:
+```sql
+-- Вставляем клиента из Казани — с уникальным email
+INSERT INTO moscow_customers (name, email, city)
+VALUES ('Пётр Второй', 'petr2@example.com', 'Казань');
+```
+```sql
+-- Проверяем: строка есть в customers, но не видна через VIEW
+SELECT * FROM customers WHERE email = 'petr2@example.com';
+```
+```sql
+SELECT * FROM moscow_customers;
+```
+С WITH CHECK OPTION — вставка запрещена
 ```sql
 CREATE OR REPLACE VIEW moscow_customers AS
-SELECT id, name, city FROM customers WHERE city = 'Москва'
+SELECT id, name, email, city
+FROM customers
+WHERE city = 'Москва'
 WITH CHECK OPTION;
+
+INSERT INTO moscow_customers (name, email, city)
+VALUES ('Пётр Третий', 'petr3@example.com', 'Казань');
 ```
-Теперь:
-```sql
-INSERT INTO moscow_customers (name, city) VALUES ('Пётр', 'Казань');
 -- ERROR 1369 (HY000): CHECK OPTION failed 'sql_practice.moscow_customers'
+
+Теперь MySQL заранее проверяет, что вставляемая строка соответствует WHERE city = 'Москва'. Раз Казань не подходит — вставка отклоняется.
+
+В таблице customers остались лишние строки (Пётр Второй, возможно Пётр Третий). Удалите их перед следующими разделами:
+```sql
+DELETE FROM customers WHERE email IN ('petr2@example.com', 'petr3@example.com');
 ```
-**Правило:** `WITH CHECK OPTION` запрещает вставки/обновления, которые не соответствуют условию `WHERE` в VIEW.
+Или полностью вернуть исходное состояние:
+```sql
+DELETE FROM customers WHERE id > 5;
+```
 
 ---
 
@@ -449,11 +474,7 @@ GRANT SELECT ON sql_practice.public_customers TO 'analyst'@'%';
 ```sql
 \q
 ```
-Делаем дамп:
-```shell
-docker exec my-mysql mysqldump -uroot -p123 sql_practice > dump.sql
-```
-Или без предупреждения о пароле в командной строке:
+Делаем дамп без предупреждения о пароле в командной строке:
 ```shell
 docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot sql_practice > dump.sql
 ```
@@ -477,6 +498,11 @@ MySQL может записывать все команды, которые вы
 
 В `my.cnf` уже прописаны `general_log = 1` и `log_output = FILE`, поэтому после перезапуска контейнера лог должен быть активен. Проверьте в клиенте MySQL:
 
+Вернуться в контейнер:
+```shell
+docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
+```
+и выполнить это:
 ```sql
 SHOW VARIABLES LIKE 'general_log%';
 SHOW VARIABLES LIKE 'log_output';
@@ -494,6 +520,11 @@ SET GLOBAL log_output = 'FILE';
 Файл лога лежит внутри контейнера по пути `/var/lib/mysql/general.log`.
 
 Проверить, что файл существует:
+
+Покинуть контейнер:
+```sql
+\q
+```
 ```shell
 docker exec my-mysql ls -la /var/lib/mysql/general.log
 ```
@@ -506,7 +537,7 @@ docker exec my-mysql cat /var/lib/mysql/general.log
 docker cp my-mysql:/var/lib/mysql/general.log ./general.log
 ```
 
-### 14.3. Отфильтровать только свои действия
+### 14.3. Отфильтровать только свои действия (не обязательно)
 
 В логе много служебных записей (`Connect`, `Quit`, `SET NAMES`, `SHOW VARIABLES` и т.п.). Отфильтровать их можно одной командой на хосте:
 ```shell
@@ -564,7 +595,7 @@ docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
 
 ---
 
-## 🔹 17. Полный пример «с нуля» (для наглядности)
+## 🔹 17. Полный пример «с нуля» (для наглядности - делать не обязательно)
 
 ```sql
 USE sql_practice;
