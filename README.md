@@ -203,12 +203,13 @@ git config --global user.email "rosa@mail.ru"
 
 1. [Сначал включите **WSL** на своём компьютере!](#wsl)
 1. [Загрузить и установить Docker-Desktop](https://www.docker.com/products/docker-desktop/) или командой в **PowerShell** `winget install Docker.DockerDesktop`
-1. Выполнять авторизацию в **Docker-Desktop** не обязательно (можно пропустить или авторизироваться через Google), указать `personal`;
+1. Выполнять авторизацию в **Docker-Desktop** не обязательно (можно пропустить или авторизироваться через Google), указать `personal` и скипнуть;
 1. Перезагрузить компьютер;
 1. Запустить **Docker Desktop** (можно добавить в автозагрузку для удобства);
 1. Установить и запустить тестовый контейнер `docker run hello-world`
 1. Если `docker run hello-world` не срабатывает, то в **Ubuntu WSL** выполните `sudo service docker restart`
 1. Включите интеграцию с **WSL**: После запуска **Docker Desktop** перейдите в **Settings** (Настройки) → Resources (Ресурсы) → **WSL Integration** (Интеграция с WSL).
+1. Перезагрузить компьютер;
 
 > Если компьютер не тянет в **WSL 2.0** и **Docker**, то можно ограничется [Codespace](https://github.com/features/codespaces) (но не желательно, т.к. очень ограниченный функционал!)
 
