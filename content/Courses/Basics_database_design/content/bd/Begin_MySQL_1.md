@@ -2,6 +2,8 @@
 
 **InnoDB** — движок для MySQL
 
+> **Задание выполнять в VS Code - Git-Bash!**
+
 **Задачи:**
 - запустить «чистый» контейнер
 - подключиться к нему
@@ -57,7 +59,7 @@ default-character-set = utf8mb4
 [mysql]
 default-character-set = utf8mb4
 ```
-Контейнер с официального образа **MySQL**:
+Контейнер с официального образа **MySQL** (Git-Bash):
 ```bash
 docker run --name my-mysql \
   -e MYSQL_ROOT_PASSWORD=123 \
@@ -242,7 +244,7 @@ SELECT * FROM users WHERE id = 1\G
 ```sql
 \q
 ```
-Делаем дамп - рекомендуемый вариант, без GTID и с согласованным снимком:
+Делаем дамп - рекомендуемый вариант, без GTID и с согласованным снимком (Git-Bash):
 ```shell
 docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot \
   --set-gtid-purged=OFF \
@@ -320,7 +322,7 @@ docker exec my-mysql ls -la /var/lib/mysql/general.log
 ```shell
 docker exec my-mysql cat /var/lib/mysql/general.log
 ```
-Забрать лог на хост:
+Забрать лог на хост (Git-Bash):
 ```shell
 docker exec my-mysql cat /var/lib/mysql/general.log \
   | grep "Query" \

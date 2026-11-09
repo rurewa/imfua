@@ -2,6 +2,9 @@
 
 ### 🔌 Подключение к контейнеру
 
+
+> **Задание выполнять в VS Code - Git-Bash!**
+
 > **Работу можно выполнять в созданном ранее каталоге `my-mysql`, в котором уже есть файл `my.cnf`**
 
 Замените старое файла содержимое файла `my.cnf` на это:
@@ -30,7 +33,7 @@ docker volume prune -a
 ```
 > **docker volume prune -a удаляет все неиспользуемые тома — используйте с осторожностью!**
 
-потом создать новый контейнер
+потом создать новый контейнер (Git-Bash):
 ```bash
 docker run --name my-mysql \
   -e MYSQL_ROOT_PASSWORD=123 \
@@ -649,6 +652,7 @@ LIMIT 10;
 
 **12.2. Экспорт лога в файл на хосте**
 
+Git-Bash:
 ```shell
 docker exec -e MYSQL_PWD=123 my-mysql mysql -uroot \
   --default-character-set=utf8mb4 \
@@ -671,7 +675,7 @@ cat my_actions_export.log
 ```shell
 docker exec my-mysql mysqldump -uroot -p123 sql_practice > dump.sql
 ```
-Рекомендуемый вариант — без GTID и с согласованным снимком:
+Рекомендуемый вариант — без GTID и с согласованным снимком (Git-Bash):
 ```shell
 docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot \
   --set-gtid-purged=OFF \

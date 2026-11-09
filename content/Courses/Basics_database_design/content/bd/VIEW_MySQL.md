@@ -4,6 +4,9 @@
 
 [Подробней о представлениях VIEW](/content/Courses/Basics_database_design/content/Docs/VIEW.md)
 
+
+> **Задание выполнять в VS Code - Git-Bash!**
+
 > **Работу можно выполнять в созданном ранее каталоге `my-mysql`, в котором уже есть файл `my.cnf`**
 
 ---
@@ -490,7 +493,7 @@ GRANT SELECT ON sql_practice.public_customers TO 'analyst'@'%';
 ```shell
 docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot sql_practice > dump.sql
 ```
-После чего в папке `my-mysql` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой:
+После чего в папке `my-mysql` появится текстовый файл `dump.sql`, содержимое которого можно увидеть командой (Git-Bash):
 ```shell
 cat dump.sql
 ```
@@ -544,14 +547,14 @@ docker exec my-mysql ls -la /var/lib/mysql/general.log
 ```shell
 docker exec my-mysql cat /var/lib/mysql/general.log
 ```
-Забрать лог на хост:
+Забрать лог на хост (Git-Bash):
 ```shell
 docker cp my-mysql:/var/lib/mysql/general.log ./general.log
 ```
 
 ### 14.3. Отфильтровать только свои действия (не обязательно)
 
-В логе много служебных записей (`Connect`, `Quit`, `SET NAMES`, `SHOW VARIABLES` и т.п.). Отфильтровать их можно одной командой на хосте:
+В логе много служебных записей (`Connect`, `Quit`, `SET NAMES`, `SHOW VARIABLES` и т.п.). Отфильтровать их можно одной командой на хосте (Git-Bash):
 ```shell
 docker exec my-mysql cat /var/lib/mysql/general.log \
   | grep "Query" \
@@ -560,7 +563,7 @@ docker exec my-mysql cat /var/lib/mysql/general.log \
 ```
 Теперь в файле `my_actions.log` — только ваши осмысленные SQL-команды.
 
-Проверить:
+Проверить (Git-Bash):
 ```shell
 cat my_actions.log
 ```
