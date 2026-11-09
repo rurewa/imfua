@@ -322,7 +322,6 @@ flowchart LR
     style A fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
 ```
 
-
 ```markdown
   . . . . . . . . . . . . . . . . .
   .               .               V

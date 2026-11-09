@@ -44,6 +44,7 @@ default-character-set = utf8mb4
 
 ## 🔹 1. Запуск контейнера MySQL
 
+Git-Bash:
 ```bash
 docker run --name shop_norm \
   -e MYSQL_ROOT_PASSWORD=123 \
@@ -53,9 +54,7 @@ docker run --name shop_norm \
   -v $(pwd)/my.cnf:/etc/mysql/conf.d/my.cnf \
   -d mysql:8.0
 ```
-
 Убедитесь, что контейнер запущен:
-
 ```bash
 docker ps
 ```
@@ -67,7 +66,6 @@ docker ps
 ```shell
 docker exec shop_norm sh -c ': > /var/lib/mysql/general.log'
 ```
-
 Файл обнулится. Теперь в лог попадут **только ваши действия**.
 
 ### Подключение к MySQL
@@ -90,9 +88,7 @@ CREATE DATABASE shop_norm
   COLLATE utf8mb4_unicode_ci;
 USE shop_norm;
 ```
-
 Проверить:
-
 ```sql
 SHOW DATABASES;
 ```
@@ -121,22 +117,17 @@ INSERT INTO orders_bad (customer_name, customer_city, product_name, product_pric
   ('Мария', 'Казань',          'Хурма',    350, 1, '2026-10-03'),
   ('Пётр',  'Санкт-Петербург', 'Каштаны',  200, 2, '2026-10-04');
 ```
-
 Проверить:
-
 ```sql
 SHOW TABLES;
 SELECT * FROM orders_bad;
 ```
-
 **Сколько потратил Иван?**
-
 ```sql
 SELECT SUM(product_price * quantity) AS total
 FROM orders_bad
 WHERE customer_name = 'Иван';
 ```
-
 Работает, но данные дублируются, и любое изменение — риск аномалии.
 
 ---
@@ -146,19 +137,15 @@ WHERE customer_name = 'Иван';
 ### 3.1. Аномалия обновления
 
 Обновим город Ивана **только в одной строке**:
-
 ```sql
 UPDATE orders_bad
 SET customer_city = 'Сочи'
 WHERE order_id = 1;
 ```
-
 Проверим:
-
 ```sql
 SELECT * FROM orders_bad WHERE customer_name = 'Иван';
 ```
-
 **Результат:** у Ивана теперь два разных города — «Сочи» и «Москва».
 
 **Вывод:** один и тот же факт (место жительства) продублирован. При изменении легко забыть обновить все строки. В нормализованной базе город хранился бы в одной строке таблицы `customers`.
@@ -167,56 +154,41 @@ SELECT * FROM orders_bad WHERE customer_name = 'Иван';
 
 ### 3.2. Аномалия удаления
 
-Удалим последний заказ Марии:
-
+Удалим **один** заказ Марии (последний по дате):
 ```sql
 DELETE FROM orders_bad WHERE order_id = 4;
 ```
-
 Проверим:
-
 ```sql
 SELECT * FROM orders_bad WHERE customer_name = 'Мария';
 ```
-
 **Результат:** информация о Марии пока осталась — у неё есть ещё заказ `order_id = 3`.
 
-Удалим и его:
+> ⚠️ Если удалить и второй заказ, Мария полностью исчезнет из базы. Мы **не будем** этого делать, чтобы сохранить данные для нормализации. Но вы можете убедиться в этом самостоятельно, а затем вернуть данные, выполнив `INSERT` заново.
 
-```sql
-DELETE FROM orders_bad WHERE order_id = 3;
-```
-
-Снова проверим:
-
-```sql
-SELECT * FROM orders_bad WHERE customer_name = 'Мария';
-```
-
-**Результат:** пустой набор. Мария полностью исчезла из базы.
-
-**Вывод:** вместе с заказом мы потеряли и данные о клиенте. В нормализованной схеме клиент хранится отдельно и не удаляется вместе с заказами.
+**Вывод:** при удалении всех заказов клиент исчезает из базы. В нормализованной схеме клиент хранится отдельно и не удаляется вместе с заказами.
 
 ---
 
 ### 3.3. Аномалия вставки
 
 Попробуем добавить клиента **без заказа**:
-
 ```sql
 INSERT INTO orders_bad (customer_name, customer_city)
 VALUES ('Новый клиент', 'Тверь');
 ```
-
 Проверим:
-
 ```sql
 SELECT * FROM orders_bad WHERE customer_name = 'Новый клиент';
 ```
-
 **Результат:** строка есть, но все поля, относящиеся к заказу, — `NULL`.
 
 **Вывод:** нельзя сохранить клиента, не создавая фиктивный заказ. Таблица не позволяет хранить сущность «клиент» отдельно от сущности «заказ».
+
+**После демонстрации удалим эту тестовую строку**, чтобы она не мешала переносу данных (в ней `NULL` в полях заказа, а в нормализованных таблицах эти поля обязательны):
+```sql
+DELETE FROM orders_bad WHERE customer_name = 'Новый клиент';
+```
 
 ---
 
@@ -225,7 +197,7 @@ SELECT * FROM orders_bad WHERE customer_name = 'Новый клиент';
 | Аномалия | Что делает запрос | Что показывает |
 |----------|-------------------|----------------|
 | **Обновления** | Меняет город только в одной строке | Тот же клиент имеет разные города в разных заказах |
-| **Удаления** | Удаляет последние заказы Марии | При удалении всех заказов клиент исчезает из базы |
+| **Удаления** | Удаляет один заказ Марии | Информация о клиенте сохраняется, пока есть хотя бы один заказ. При удалении всех заказов клиент исчезает |
 | **Вставки** | Пытается добавить клиента без заказа | Появляется строка с `NULL` в полях заказа |
 
 ---
@@ -233,23 +205,17 @@ SELECT * FROM orders_bad WHERE customer_name = 'Новый клиент';
 ## 🔹 4. Дамп «плохой» базы (до нормализации)
 
 Выйдите из клиента MySQL:
-
 ```sql
 \q
 ```
-
 Сделайте дамп:
-
 ```shell
 docker exec -e MYSQL_PWD=123 shop_norm mysqldump -uroot shop_norm > dump_bad.sql
 ```
-
 Посмотрите содержимое:
-
 ```shell
 cat dump_bad.sql
 ```
-
 `.sql`-файл — текстовое представление вашей БД. Его можно хранить как резервную копию и использовать для восстановления.
 
 ---
@@ -257,18 +223,23 @@ cat dump_bad.sql
 ## 🔹 5. Создание нормализованной схемы (3NF)
 
 Вернитесь в клиент MySQL:
-
 ```shell
 docker exec -it shop_norm mysql --default-character-set=utf8mb4 -uroot -p
 ```
-
 Выберите базу:
-
 ```sql
 USE shop_norm;
 ```
 
 > ⚠️ **Важно:** таблицы создаются **пустыми**. Данные будут перенесены из `orders_bad` в шаге 6. Не заполняйте их вручную — иначе при переносе возникнут дубликаты и конфликты ключей.
+>
+> Если вы уже выполняли это руководство раньше и таблицы 3NF уже существуют, удалите их перед созданием:
+> ```sql
+> DROP TABLE IF EXISTS order_items_3nf;
+> DROP TABLE IF EXISTS orders_3nf;
+> DROP TABLE IF EXISTS customers_3nf;
+> DROP TABLE IF EXISTS products_3nf;
+> ```
 
 ### 5.1. Четыре таблицы в 3NF
 
@@ -305,9 +276,7 @@ CREATE TABLE order_items_3nf (
     FOREIGN KEY (product_id) REFERENCES products_3nf(product_id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-
 Проверить структуру:
-
 ```sql
 SHOW TABLES;
 DESCRIBE customers_3nf;
@@ -334,6 +303,14 @@ DESCRIBE order_items_3nf;
 ---
 
 ## 🔹 6. Перенос данных из `orders_bad` в 3NF
+
+> ⚠️ Если вы уже выполняли перенос раньше и в таблицах 3NF есть данные, очистите их перед повторным запуском:
+> ```sql
+> TRUNCATE TABLE order_items_3nf;
+> TRUNCATE TABLE orders_3nf;
+> TRUNCATE TABLE customers_3nf;
+> TRUNCATE TABLE products_3nf;
+> ```
 
 ### 6.1. Клиенты (уникальные пары «имя + город»)
 
@@ -454,11 +431,19 @@ SELECT * FROM customers_3nf WHERE customer_name = 'Иван';
 ### 8.2. Удаление заказов Марии
 
 ```sql
--- Удаляем все заказы Марии
+-- Удаляем все заказы Марии по её имени (через подзапрос)
 DELETE FROM order_items_3nf
-WHERE order_id IN (SELECT order_id FROM orders_3nf WHERE customer_id = 2);
+WHERE order_id IN (
+    SELECT o.order_id
+    FROM orders_3nf o
+    JOIN customers_3nf c ON o.customer_id = c.customer_id
+    WHERE c.customer_name = 'Мария'
+);
 
-DELETE FROM orders_3nf WHERE customer_id = 2;
+DELETE FROM orders_3nf
+WHERE customer_id IN (
+    SELECT customer_id FROM customers_3nf WHERE customer_name = 'Мария'
+);
 
 -- Клиент остался!
 SELECT * FROM customers_3nf WHERE customer_name = 'Мария';
@@ -489,7 +474,7 @@ SELECT * FROM customers_3nf WHERE customer_name = 'Новый клиент';
 DROP TABLE orders_bad;
 ```
 
-**Вариант 2 (безопаснее):** переименовать в архив:
+**Вариант 2 (безопаснее):** переименовать в архив (не обязательно!):
 
 ```sql
 RENAME TABLE orders_bad TO orders_bad_backup;
@@ -538,9 +523,11 @@ cat norm_dump.sql
 ```shell
 docker exec shop_norm ls -la /var/lib/mysql/general.log
 ```
-
+Команда должна вернуть примерно это:
+```shell
+-rw-r----- 1 mysql mysql 18934 Nov  9 08:22 /var/lib/mysql/general.log
+```
 Заглянуть в лог:
-
 ```shell
 docker exec shop_norm cat /var/lib/mysql/general.log
 ```
@@ -577,7 +564,6 @@ docker exec shop_norm cat /var/lib/mysql/general.log \
 ```shell
 cat my_actions.log
 ```
-
 В файле `my_actions.log` останутся **только ваши осмысленные SQL-команды** — без служебного шума.
 
 ### 11.4. Что примерно попадёт в `my_actions.log`
@@ -593,8 +579,8 @@ SELECT * FROM orders_bad
 SELECT SUM(product_price * quantity) AS total FROM orders_bad WHERE ...
 UPDATE orders_bad SET customer_city = 'Сочи' WHERE order_id = 1
 DELETE FROM orders_bad WHERE order_id = 4
-DELETE FROM orders_bad WHERE order_id = 3
 INSERT INTO orders_bad (customer_name, customer_city) VALUES ...
+DELETE FROM orders_bad WHERE customer_name = 'Новый клиент'
 CREATE TABLE customers_3nf ...
 CREATE TABLE products_3nf ...
 CREATE TABLE orders_3nf ...
@@ -607,7 +593,6 @@ SELECT SUM(...) AS total_old FROM orders_bad
 SELECT SUM(...) AS total_new FROM order_items_3nf ...
 ...
 ```
-
 Никаких `SET NAMES`, `SELECT @@version_comment`, `Connect`, `Quit`, `INSERT INTO help_topic` и `time_zone`.
 
 ### 11.5. Очистить лог (если нужно начать заново)
@@ -615,7 +600,6 @@ SELECT SUM(...) AS total_new FROM order_items_3nf ...
 ```shell
 docker exec shop_norm sh -c ': > /var/lib/mysql/general.log'
 ```
-
 Файл обнулится, но останется на месте. MySQL продолжит в него писать.
 
 ### 11.6. Рекомендация для чистого лога
@@ -640,7 +624,7 @@ docker exec shop_norm sh -c ': > /var/lib/mysql/general.log'
 | Что демонстрирует руководство | Результат |
 |-------------------------------|-----------|
 | Аномалия обновления | Два разных города у одного клиента → в 3NF одно обновление |
-| Аномалия удаления | Удаление заказа «убивает» клиента → в 3NF клиент остаётся |
+| Аномалия удаления | Удаление всех заказов «убивает» клиента → в 3NF клиент остаётся |
 | Аномалия вставки | Клиент без заказа невозможен → в 3NF возможен |
 | Дублирование данных | Имя клиента повторяется в каждой строке → в 3NF хранится один раз |
 | Цена товара | Повторяется в каждой строке → в 3NF хранится один раз |
