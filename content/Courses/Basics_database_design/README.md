@@ -31,8 +31,12 @@
   - [Интерактивная работа с MySQL в изолированном окружении Docker № 2](/content/Courses/Basics_database_design/content/bd/Begin_MySQL_2.md)
   - [Основные операции на примере двух таблиц «products 1» и «products 2»](/content/Courses/Basics_database_design/content/bd/Products.md)
   - [Руководство по представлениям (VIEW) в MySQL](/content/Courses/Basics_database_design/content/bd/VIEW_MySQL.md)
-  - [Нормализация данных. Практическое руководство 1](/content/Courses/Basics_database_design/content/bd/Normalization_1.md)
-  - [Лабораторная работа по нормализации данных в БД - 2](/content/Courses/Basics_database_design/content/bd/Normalization_2.md)
+  - [Лабораторная # 1 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_1.md)
+  - [Лабораторная # 2 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_2.md)
+  - [Лабораторная # 3 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_3.md)
+  - [Лабораторная # 4 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_4.md)
+  - [Лабораторная # 5 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_5.md)
+  - []()
 
 ***
 
