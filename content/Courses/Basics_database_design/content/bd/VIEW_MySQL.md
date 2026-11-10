@@ -5,7 +5,7 @@
 [Подробней о представлениях VIEW](/content/Courses/Basics_database_design/content/Docs/VIEW.md)
 
 
-> **Задание выполнять в VS Code - Git-Bash!**
+> **Задание выполнять в VS Code - Git-Bash - Docker CLI!!**
 
 > **Работу можно выполнять в созданном ранее каталоге `my-mysql`, в котором уже есть файл `my.cnf`**
 
@@ -610,7 +610,7 @@ docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
 
 ---
 
-## 🔹 17. Полный пример «с нуля» (для наглядности - делать не обязательно)
+## 🔹 17. Полный пример «с нуля» (для наглядности - делать не надо!)
 
 ```sql
 USE sql_practice;
@@ -642,6 +642,8 @@ SHOW FULL TABLES WHERE Table_type = 'VIEW';
 -- 7. Убрать тестового клиента
 DELETE FROM customers WHERE email = 'test@example.com';
 ```
+
+Результат оформить в виде отдельного `README.md` со скриншотами результатов ваших действий, дампом и логом (лог-файл должен содержать только ваши действия) в этой же папке и прислать ссылку преподавателю.
 
 ---
 
