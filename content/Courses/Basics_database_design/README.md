@@ -36,7 +36,7 @@
   - [Лабораторная # 3 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_3.md)
   - [Лабораторная # 4 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_4.md)
   - [Лабораторная # 5 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_5.md)
-  - []()
+  - [Лабораторная работа по Алиасам в MySQL](/content/Courses/Basics_database_design/content/bd/Aliases.md)
 
   После освоения базовых операций SQL, представлению View и нормализации таблиц, что ещё надо освоить в Базах данны?
 

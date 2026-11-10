@@ -4,7 +4,7 @@
 
 ---
 
-> **Задание выполнять в VS Code - Git-Bash - Docker CLI!!**
+> **Задание выполнять в VS Code — Git-Bash — Docker CLI!**
 
 ## 🔹 0. Подготовка окружения
 
@@ -29,9 +29,18 @@ default-character-set = utf8mb4
 
 > ⚠️ Если файла `my.cnf` не будет, Docker создаст директорию с таким именем, и MySQL не запустится. Убедитесь, что это именно файл.
 
-Удалите старый контейнер с MySQL, его volums и создайте новый
-
 ### 0.2. Запуск контейнера
+
+Удалите старый контейнер и его volume (если они есть):
+
+```bash
+docker stop mysql_alias
+docker rm mysql_alias
+docker volume rm mysql_alias_data
+docker volume prune -a
+```
+
+Создайте новый контейнер:
 
 Git-Bash
 ```bash
@@ -92,9 +101,17 @@ CREATE TABLE orders (
     status VARCHAR(20) DEFAULT 'new',
     FOREIGN KEY (customer_id) REFERENCES customers(id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    position VARCHAR(100),
+    manager_id INT,
+    FOREIGN KEY (manager_id) REFERENCES employees(id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Заполним данными:
+Заполним таблицы данными:
 
 ```sql
 INSERT INTO customers (name, email, city) VALUES
@@ -111,6 +128,14 @@ INSERT INTO orders (customer_id, order_date, amount, status) VALUES
   (3, '2026-10-07', 4200.00, 'paid'),
   (3, '2026-10-10', 1100.00, 'cancelled'),
   (4, '2026-10-12', 950.00, 'new');
+
+INSERT INTO employees (name, position, manager_id) VALUES
+  ('Анна Петрова',   'Генеральный директор', NULL),
+  ('Игорь Смирнов',  'Финансовый директор',  1),
+  ('Елена Кузнецова','Технический директор', 1),
+  ('Дмитрий Орлов',  'Ведущий разработчик',  3),
+  ('Ольга Зайцева',  'Разработчик',          3),
+  ('Сергей Волков',  'Бухгалтер',            2);
 ```
 
 Проверим:
@@ -118,6 +143,7 @@ INSERT INTO orders (customer_id, order_date, amount, status) VALUES
 ```sql
 SELECT * FROM customers;
 SELECT * FROM orders;
+SELECT * FROM employees;
 ```
 
 ---
@@ -141,6 +167,8 @@ SELECT * FROM orders;
 ```sql
 FROM имя_таблицы [AS] псевдоним
 ```
+
+> Это для примера — не выполнять!
 
 `AS` необязателен, но его часто пишут для ясности. После объявления алиаса **везде** в запросе используется только он.
 
@@ -238,7 +266,7 @@ GROUP BY customer_id;
 ### Пример: алиас в `ORDER BY`
 
 ```sql
-SELECT name, amount * 2 AS double_amount
+SELECT id, amount * 2 AS double_amount
 FROM orders
 ORDER BY double_amount DESC;
 ```
@@ -247,17 +275,20 @@ ORDER BY double_amount DESC;
 
 ### Пример: алиас в `WHERE` (ошибка)
 
-Неправильно
+Неправильно:
+
 ```sql
 -- ❌ Unknown column 'double_amount' in 'where clause'
-SELECT name, amount * 2 AS double_amount
+SELECT id, amount * 2 AS double_amount
 FROM orders
 WHERE double_amount > 1000;
 ```
-Правильно
+
+Правильно:
+
 ```sql
 -- ✅ Правильно: повторить выражение
-SELECT name, amount * 2 AS double_amount
+SELECT id, amount * 2 AS double_amount
 FROM orders
 WHERE amount * 2 > 1000;
 ```
@@ -318,16 +349,12 @@ FROM customers c;
 ```sql
 SELECT c.name AS customer,
        o.order_date,
-       p.title AS product,
-       oi.quantity,
-       p.price,
-       oi.quantity * p.price AS line_total
+       o.amount,
+       o.amount * 2 AS double_amount
 FROM customers c
-JOIN orders o       ON c.id = o.customer_id
-JOIN order_items oi ON o.id = oi.order_id
-JOIN products p     ON oi.product_id = p.id
+JOIN orders o ON c.id = o.customer_id
 WHERE o.status = 'paid'
-ORDER BY line_total DESC;
+ORDER BY double_amount DESC;
 ```
 
 Без алиасов пришлось бы писать `customers.name`, `orders.order_date` и т.д. — громоздко и трудночитаемо.
@@ -402,7 +429,7 @@ SELECT e.name, m.name FROM employees e JOIN employees m ON e.manager_id = m.id;
 
 ---
 
-## 🔹 9. Полный пример «до и после» (?)
+## 🔹 9. Полный пример «до и после»
 
 ### Без алиасов
 
@@ -433,6 +460,14 @@ ORDER BY total_amount DESC;
 Все команды, которые вы выполняли, записываются в файл `/var/lib/mysql/general.log` внутри контейнера.
 
 ### 10.1. Проверить, что лог пишется
+
+Выйдите из клиента MySQL (если ещё не вышли):
+
+```sql
+\q
+```
+
+Затем на хосте:
 
 ```shell
 docker exec mysql_alias ls -la /var/lib/mysql/general.log
@@ -481,12 +516,6 @@ docker exec -u mysql mysql_alias sh -c ': > /var/lib/mysql/general.log'
 
 ## 🔹 11. Создание дампа базы
 
-Выйдите из клиента MySQL:
-
-```sql
-\q
-```
-
 Сделайте дамп:
 
 ```shell
@@ -508,9 +537,11 @@ docker exec -e MYSQL_PWD=123 mysql_alias mysqldump -uroot \
 cat alias_dump.sql
 ```
 
-Дамп включает таблицы `customers` и `orders` с данными. При необходимости его можно использовать для восстановления базы.
+Дамп включает таблицы `customers`, `orders` и `employees` с данными. При необходимости его можно использовать для восстановления базы.
 
-Результат оформить в виде отдельного `README.md` со скриншотами результатов ваших действий, дампом и логом (лог-файл должен содержать только ваши действия) в этой же папке и прислать ссылку преподавателю.
+---
+
+**Результат оформить в виде отдельного `README.md` со скриншотами результатов ваших действий, дампом и логом (лог-файл должен содержать только ваши действия) в этой же папке и прислать ссылку преподавателю.**
 
 ---
 
