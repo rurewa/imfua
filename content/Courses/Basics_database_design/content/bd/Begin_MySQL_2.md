@@ -21,7 +21,9 @@ default-character-set = utf8mb4
 [mysql]
 default-character-set = utf8mb4
 ```
-после замены `my.cnf` перезапустить контейнер, чтобы настройки применились:
+Параметры `general_log = 1` и `general_log_file = /var/lib/mysql/general.log` нужны для того, чтобы MySQL вела файл журнала записей (лог).
+
+после замены `my.cnf` перезапустить контейнер (если вы не удаляли старый контейнер), чтобы настройки применились:
 ```shell
 docker restart my-mysql
 ```

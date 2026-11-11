@@ -1,9 +1,5 @@
 # Интерактивная работа с MySQL в изолированном окружении Docker № 1
 
-**InnoDB** — движок для MySQL
-
-> **Задание выполнять в VS Code - Git-Bash!**
-
 **Задачи:**
 - запустить «чистый» контейнер
 - подключиться к нему
@@ -59,7 +55,15 @@ default-character-set = utf8mb4
 [mysql]
 default-character-set = utf8mb4
 ```
-Контейнер с официального образа **MySQL** (Git-Bash):
+Параметры `general_log = 1` и `general_log_file = /var/lib/mysql/general.log` нужны для того, чтобы MySQL вела файл журнала записей (лог).
+
+Контейнер с официального образа **MySQL**:
+
+Power Shell
+```shell
+docker run --name my-mysql -e MYSQL_ROOT_PASSWORD=123 -e LANG=C.UTF-8 -v mysql_data:/var/lib/mysql -v ${PWD}/my.cnf:/etc/mysql/conf.d/my.cnf -d mysql:8.0
+```
+Git-Bash:
 ```bash
 docker run --name my-mysql \
   -e MYSQL_ROOT_PASSWORD=123 \
@@ -84,6 +88,8 @@ docker ps
 **Где «физически» хранятся файлы новой базы данных?**
 
 Увидеть физические файлы базы в вашем Docker-контейнере (не обязательно):
+
+PowerShell
 ```shell
 docker exec -it my-mysql ls -la /var/lib/mysql
 ```
@@ -99,13 +105,15 @@ drwxr-xr-x  mysql mysql  sys/
 ```
 > После создания базы `my_database` (см. Шаг 3) в этом каталоге появится подкаталог `my_database/` с файлами таблиц.
 
+**InnoDB** — движок для MySQL
+
 ---
 
 ### 🔌 Шаг 2: Подключение к MySQL в интерактивном режиме
 
 Теперь, когда контейнер работает, к нему нужно подключиться. Для этого используется команда `docker exec`, которая позволяет выполнить команду внутри работающего контейнера.
 
-Выполните следующую команду, чтобы открыть интерактивную оболочку **MySQL**:
+Выполните следующую команду, чтобы открыть интерактивную оболочку **MySQL** (Git-Bash, Power Shell):
 ```bash
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
@@ -244,7 +252,23 @@ SELECT * FROM users WHERE id = 1\G
 ```sql
 \q
 ```
-Делаем дамп - рекомендуемый вариант, без GTID и с согласованным снимком (Git-Bash):
+Делаем дамп - рекомендуемый вариант, без GTID и с согласованным снимком:
+
+Power Shell
+```shell
+docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot `
+  --set-gtid-purged=OFF `
+  --single-transaction `
+  my_database > dump_clean.sql
+```
+Git-Bash
+```shell
+MSYS_NO_PATHCONV=1 docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot \
+  --set-gtid-purged=OFF \
+  --single-transaction \
+  my_database > dump_clean.sql
+```
+Linux WSL
 ```shell
 docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot \
   --set-gtid-purged=OFF \
@@ -252,6 +276,8 @@ docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot \
   my_database > dump_clean.sql
 ```
 После этого в папке `my-mysql` появится текстовый файл `dump.sql` (или `dump_clean.sql`), содержимое которого можно увидеть командой:
+
+Git-Bash
 ```shell
 cat dump.sql
 ```
@@ -259,7 +285,7 @@ cat dump.sql
 
 **8. Удаление данных**
 
-Снова войдём в контейнер:
+Снова войдём в контейнер (Git-Bash, Power Shell, Linux WSL):
 ```shell
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
 ```
@@ -313,23 +339,35 @@ SHOW DATABASES;
 Все команды записываются в файл `general.log` внутри контейнера (при `log_output = FILE` в `my.cnf`).
 
 Проверить, что файл существует:
+
+PowerShell, Linux WSL
 ```shell
 docker exec my-mysql ls -la /var/lib/mysql/general.log
 ```
 > Если файл не создан — проверьте, что в `my.cnf` стоит `log_output = FILE` и `general_log = 1`, и контейнер перезапущен (`docker restart my-mysql`).
 
 Заглянуть в лог:
+
+PowerShell, Linux WSL
 ```shell
 docker exec my-mysql cat /var/lib/mysql/general.log
 ```
-Забрать лог на хост (Git-Bash):
+Забрать лог на хост:
+
+PowerShell
+```shell
+docker exec my-mysql cat /var/lib/mysql/general.log `
+  | Where-Object { $_ -cmatch "Query" -and $_ -cnotmatch "SET NAMES|SET autocommit|SET sql_mode|SET character_set_results|SHOW VARIABLES|SHOW STATUS|SHOW WARNINGS|SELECT @@|SELECT DATABASE\(\)|time_zone" } `
+  > my_actions.log
+```
+Git-Bash
 ```shell
 docker exec my-mysql cat /var/lib/mysql/general.log \
   | grep "Query" \
   | grep -v -E "SET NAMES|SET autocommit|SET sql_mode|SET character_set_results|SHOW VARIABLES|SHOW STATUS|SHOW WARNINGS|SELECT @@|SELECT DATABASE\(\)|time_zone" \
   > my_actions.log
 ```
-Очистка лога внутри контейнера:
+Очистка лога внутри контейнера (PowerShell, Linux WSL):
 ```shell
 docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
 ```
@@ -350,7 +388,7 @@ docker start my-mysql
 ```bash
 docker logs my-mysql
 ```
-**Просмотр логов контейнера с перенаправлением в файл:**
+**Просмотр логов контейнера с перенаправлением в файл (Git-Bash, PowerShell, Linux WSL):**
 ```shell
 docker logs my-mysql > log.txt
 ```
