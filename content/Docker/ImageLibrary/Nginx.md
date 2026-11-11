@@ -138,7 +138,7 @@ docker restart my-nginx
 ```
 Перезапустить контейнер по его **id**
 ```shell
-docker restart 2e6c42d9b6af
+docker restart id_контейнера
 ```
 Перед удалением нужно остановить указанный контейнер
 ```shell
@@ -170,7 +170,7 @@ docker images
 
 Опционально можно удалить по `id` нужный образ
 ```shell
-docker rmi 062a783918fb
+docker rmi id_образа
 ```
 
 ![Скрин состояния docker images](img/rm_image.png)
@@ -330,6 +330,10 @@ hollywood
 
 Отредактировать текст страницы приветствия **Nginx** (Находится в разработке!)
 
+Если вы случайно вышли из контейнера, то снова выполните вход:
+```shell
+docker exec -it my-nginx /bin/bash
+```
 Открыть файл `index.html` для редактирования содержимого
 ```shell
 micro /usr/share/nginx/html/index.html
@@ -353,6 +357,11 @@ micro /usr/share/nginx/html/index.html
 [Проверить изменения на открытой странице >>](http://localhost/)
 
 ![Скрин изменённой страницы в браузере](img/)
+
+Выйти из контейнера:
+```shell
+exit
+```
 
 Остановить все запущенные контейнеры
 ```shell
