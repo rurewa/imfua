@@ -1,12 +1,12 @@
 # SQL-команды для создания и заполнения нормализованных таблиц
 
-> Если вы уверены, что на хосте нет других важных контейнеров и volumes, можно использовать более широкие команды:
+> Если вы уверены, что на хосте нет других важных контейнеров и их volumes (тома с данными), можно использовать команды для их удаления:
 ```shell
 docker stop $(docker ps -q)
 docker container prune
 docker volume prune -a
 ```
-> Но **будьте осторожны** — они удаляют всё неиспользуемое, а не только учебный проект.
+> Но **будьте осторожны** — они удаляют всё неиспользуемое в Docker, а не только учебный проект.
 
 **Создание каталога проекта:**
 
@@ -26,7 +26,7 @@ default-character-set = utf8mb4
 [mysql]
 default-character-set = utf8mb4
 ```
-Параметры `general_log = 1` и `general_log_file = /var/lib/mysql/general.log` нужны для того, чтобы MySQL вела файл журнала записей (лог).
+Параметры `general_log = 1` и `general_log_file = /var/lib/mysql/general.log` нужны для того, чтобы **MySQL** вела файл журнала записей происходящего внутри базы данных (лог).
 
 Контейнер с официального образа **MySQL**:
 
@@ -49,6 +49,10 @@ docker ps
 ```
 Вы должны увидеть свой контейнер **my-mysql** в списке работающих.
 
+Перед началом работы (сразу после создания контейнера) очистить лог:
+```shell
+docker exec my-mysql sh -c ': > /var/lib/mysql/general.log'
+```
 Выполните следующую команду, чтобы открыть интерактивную оболочку **MySQL** (Git-Bash, Power Shell):
 ```bash
 docker exec -it my-mysql mysql --default-character-set=utf8mb4 -uroot -p
@@ -181,7 +185,6 @@ JOIN report_items ri ON r.report_id = ri.report_id
 JOIN products p    ON ri.product_id = p.product_id
 ORDER BY r.report_id, p.product_id;
 ```
-
 **Результат:**
 
 | report_id | report_date | customer_name | product_name | price | quantity |
@@ -195,6 +198,43 @@ ORDER BY r.report_id, p.product_id;
 | 1105      | 2026-03-12  | Албания       | Лимон        | 200   | 700      |
 
 Это полностью соответствует исходной ненормализованной таблице.
+
+### Получить лог
+
+Файл лога лежит внутри контейнера по пути `/var/lib/mysql/general.log`.
+
+Покинуть контейнер:
+```sql
+\q
+```
+Проверить, что файл существует:
+```shell
+docker exec my-mysql ls -la /var/lib/mysql/general.log
+```
+Заглянуть в него:
+```shell
+docker exec my-mysql cat /var/lib/mysql/general.log
+```
+В логе много служебных записей (`Connect`, `Quit`, `SET NAMES`, `SHOW VARIABLES` и т.п.). Отфильтровать их можно одной командой на хосте (Git-Bash):
+```shell
+docker exec my-mysql cat /var/lib/mysql/general.log \
+  | grep "Query" \
+  | grep -v -E "SET NAMES|SET autocommit|SET sql_mode|SET character_set_results|SHOW VARIABLES|SHOW STATUS|SHOW WARNINGS|SELECT @@|SELECT DATABASE\(\)|time_zone" \
+  > my_actions.log
+```
+Power Shell
+```shell
+docker exec my-mysql cat /var/lib/mysql/general.log `
+  | grep "Query" `
+  | grep -v -E "SET NAMES|SET autocommit|SET sql_mode|SET character_set_results|SHOW VARIABLES|SHOW STATUS|SHOW WARNINGS|SELECT @@|SELECT DATABASE\(\)|time_zone" `
+  > my_actions.log
+```
+Теперь в файле `my_actions.log` — только ваши осмысленные SQL-команды.
+
+Проверить (Git-Bash):
+```shell
+cat my_actions.log
+```
 
 ---
 

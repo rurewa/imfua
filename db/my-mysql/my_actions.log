@@ -1,0 +1,33 @@
+2026-11-12T04:57:11.334751Z	    8 Query	select @@version_comment limit 1
+2026-11-12T04:57:11.415056Z	    8 Query	START TRANSACTION
+2026-11-12T04:57:13.776063Z	    8 Query	COMMIT
+2026-11-12T04:57:13.866206Z	    9 Query	select @@version_comment limit 1
+2026-11-12T04:57:13.866446Z	    9 Query	-- enable autocommit explicitly (in case it was disabled globally)
+2026-11-12T04:57:13.866664Z	    9 Query	-- What's done in this file shouldn't be replicated
+2026-11-12T04:57:13.866721Z	    9 Query	--  or products like mysql-fabric won't work
+2026-11-12T04:57:13.866784Z	    9 Query	SET @@SESSION.SQL_LOG_BIN=0
+2026-11-12T04:57:13.866886Z	    9 Query	ALTER USER 'root'@'localhost' IDENTIFIED BY <secret>
+2026-11-12T04:57:13.876940Z	    9 Query	GRANT ALL ON *.* TO 'root'@'localhost' WITH GRANT OPTION
+2026-11-12T04:57:13.877424Z	    9 Query	FLUSH PRIVILEGES
+2026-11-12T04:57:13.878540Z	    9 Query	CREATE USER 'root'@'%' IDENTIFIED BY <secret>
+2026-11-12T04:57:13.887456Z	    9 Query	GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION
+2026-11-12T04:57:13.904831Z	    9 Query	DROP DATABASE IF EXISTS test
+2026-11-12T04:57:13.922254Z	   10 Query	shutdown
+2026-11-12T04:57:13.922288Z	   10 Query	
+2026-11-12T04:57:17.708256Z	    8 Query	select @@version_comment limit 1
+2026-11-12T04:57:23.364006Z	    8 Query	CREATE DATABASE sales
+2026-11-12T04:57:23.983430Z	    8 Query	show databases
+2026-11-12T04:57:23.986370Z	    8 Query	show tables
+2026-11-12T04:57:30.206065Z	    8 Query	CREATE TABLE customers (
+2026-11-12T04:57:35.541927Z	    8 Query	INSERT INTO customers (customer_id, customer_name) VALUES
+2026-11-12T04:57:41.238409Z	    8 Query	CREATE TABLE products (
+2026-11-12T04:57:45.861685Z	    8 Query	INSERT INTO products (product_id, product_name, price) VALUES
+2026-11-12T04:57:51.229820Z	    8 Query	CREATE TABLE reports (
+2026-11-12T04:57:57.077974Z	    8 Query	INSERT INTO reports (report_id, report_date, customer_id) VALUES
+2026-11-12T04:58:03.037723Z	    8 Query	CREATE TABLE report_items (
+2026-11-12T04:58:08.957516Z	    8 Query	INSERT INTO report_items (report_id, product_id, quantity) VALUES
+2026-11-12T04:58:13.995457Z	    8 Query	SELECT * FROM customers
+2026-11-12T04:58:13.998804Z	    8 Query	SELECT * FROM products
+2026-11-12T04:58:14.001270Z	    8 Query	SELECT * FROM reports
+2026-11-12T04:58:14.461553Z	    8 Query	SELECT * FROM report_items
+2026-11-12T04:58:19.533440Z	    8 Query	SELECT r.report_id, r.report_date, c.customer_name,
