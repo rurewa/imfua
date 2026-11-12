@@ -7,6 +7,7 @@
 - [Основы проектирования баз данных](/content/Courses/Basics_database_design/content/Begin.md)
 - [Классификация Баз Данных](/content/Courses/Basics_database_design/content/All_db.md)
 - [ER-диаграмы](/content/Courses/Basics_database_design/content/ER_dia.md)
+- [«Команды» и «запросы» в SQL: в чём разница](/content/Courses/Basics_database_design/content/Docs/Command_or_request.md)
 - [Алиасы в SQL](/content/Courses/Basics_database_design/content/Docs/Aliases.md)
 - [Дамп БД](/content/Courses/Basics_database_design/content/Docs/dump.md)
 - [Оператор `IN` в SQL](/content/Courses/Basics_database_design/content/Docs/IN.md)
