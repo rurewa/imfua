@@ -819,24 +819,6 @@ VALUES (101,'дыни',800);
 
 Для удаления данных используется команда **DELETE**, а для обновления **UPDATE**.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Руководства и лабораторные работы по нормализации данных:
 - [Нормализация данных. Практическое руководство](/content/Courses/Basics_database_design/content/bd/Normalization.md)
 - [Лабораторная # 1 работа по нормализации данных в БД](/content/Courses/Basics_database_design/content/bd/Normalization_1.md)
