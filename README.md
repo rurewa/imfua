@@ -13,7 +13,7 @@
     - [Инструментальные средства разработки ПО](/content/Courses/SoftwareDevelopmentTools/)
     - [Информационные технологии](/content/Courses/IT/)
     - [Информационные системы и технологии](/content/Courses/IT_systems/README.md)
-    - [Основы проектирования баз данных](/content/Courses/Basics_database_design/)
+    - [Основы проектирования баз данных](/content/Courses/Basics_database_design/README.md)
     - [Обеспечение качества функционирования компьютерных систем](/content//Courses/Ensuring_quality_computer_systems_functioning/)
     - [Поддержка и тестирование программных модулей](/content/Courses/SupportAndTesting_of_software_modules/)
     - [Операционные системы и среды](/content/Courses/OS_and_Environments/README.md)
