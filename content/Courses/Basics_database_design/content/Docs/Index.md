@@ -132,7 +132,7 @@ CREATE INDEX idx_city_name ON customers(city, name);
 SELECT name FROM customers WHERE city = 'Москва';
 ```
 
-Индекс `(city, name)` содержит и `city` (для `WHERE`), и `name` (для `SELECT`). MySQL читает только индекс — таблица не нужна.
+Индекс `(city, name)` содержит и `city` (для `WHERE`), и `name` (для `SELECT`). **MySQL** читает только индекс — таблица не нужна.
 
 **Проверить в `EXPLAIN`:** столбец `Extra` содержит `Using index`.
 
@@ -410,10 +410,4 @@ GROUP BY TABLE_NAME, INDEX_NAME;
 | Функции в `WHERE` и `LIKE '%...'` **ломают** индекс |
 | Не индексируйте «на всякий случай» — только под частые запросы |
 
-**Практическое задание для вашего контейнера:**
-
-1. Посмотрите `SHOW INDEX FROM orders;` — какие индексы уже есть?
-2. Выполните `EXPLAIN SELECT * FROM orders WHERE amount > 1000;` — full scan?
-3. Создайте `CREATE INDEX idx_amount ON orders(amount);` и повторите `EXPLAIN`.
-4. Сравните `type` и `rows`.
-5. Попробуйте `EXPLAIN SELECT * FROM orders WHERE YEAR(order_date) = 2026;` — видите, что индекс не работает? Перепишите запрос.
+> Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
