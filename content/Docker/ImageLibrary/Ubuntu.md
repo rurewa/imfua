@@ -28,8 +28,10 @@ Run 'docker run --help' for more information
 ```shell
 apt update && apt install neofetch
 ```
+или **fastfetch**, если не находит **neofetch**
+Выполнить fastfetch:
 ```shell
-curl --version
+fastfetch
 ```
 
 Выйти из контейнера можно по команде `exit`
