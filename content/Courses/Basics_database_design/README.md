@@ -2,6 +2,8 @@
 
 ## Навигация по предмету
 
+- [Вопросы к экзамену](/content/Courses/Basics_database_design/questions.md)
+
 Теория
 - [Данные](/content/Courses/Basics_database_design/content/Data.md)
 - [Основы проектирования баз данных](/content/Courses/Basics_database_design/content/Begin.md)
@@ -55,6 +57,11 @@
 - [Air flights database analysis](https://github.com/igsuvorov/Air_flights_database_analysis?ysclid=mw0buiq89f403052923)
 - [Демонстрационная база данных](https://postgrespro.ru/education/demodb?ysclid=mw0btgkgnm893794791)
 - [test_db](https://github.com/datacharmer/test_db?ysclid=mw0bxj6m4109233723)
+- [Памятка/шпаргалка по SQL](https://habr.com/ru/articles/564390/)
+- [LibreDB Studio](https://www.opennet.ru/opennews/art.shtml?num=66216)
+- [Практическое владение языком SQL](https://sql-ex.ru/)
+- [Создание ER-диаграмм](https://app.diagrams.net/)
+- [Тренажёр SQL ](https://sql.coderang.dev/)
 
 
 ---
@@ -254,12 +261,6 @@
 
 Понимание этих основных понятий является абсолютно необходимым для грамотного и эффективного проектирования любой базы данных.
 
-### Полезные Ссылки
-
-- [Памятка/шпаргалка по SQL](https://habr.com/ru/articles/564390/)
-- [LibreDB Studio](https://www.opennet.ru/opennews/art.shtml?num=66216)
-- [Практическое владение языком SQL](https://sql-ex.ru/)
-- [Создание ER-диаграмм](https://app.diagrams.net/)
-- [Тренажёр SQL ](https://sql.coderang.dev/)
+- [Вопросы к экзамену](/content/Courses/Basics_database_design/questions.md)
 
 > Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
