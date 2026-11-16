@@ -77,7 +77,7 @@ COPY CMakeLists.txt main.cpp ./
 RUN cmake -B build -S . -G Ninja && \
     cmake --build build --parallel
 ENV QT_QPA_PLATFORM=xcb
-CMD ["./build/qt6_app"]
+CMD ["./build/qt6-app"]
 ```
 
 ### 3. Содержимое файла `CMakeLists.txt`
@@ -90,8 +90,8 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 
-add_executable(qt6_app main.cpp)
-target_link_libraries(qt6_app Qt6::Core Qt6::Widgets)
+add_executable(qt6-app main.cpp)
+target_link_libraries(qt6-app Qt6::Core Qt6::Widgets)
 ```
 
 ### 4. Содержимое файла `main.cpp` (простое Qt-приложение)
@@ -142,6 +142,10 @@ docker run -it --rm \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   qt6-app
+```
+Если возникнет ошибка, то перед новой попыткой выполните (для linux):
+```shell
+xhost +local:docker
 ```
 
 Создание и запуск контейнера для **macOS** (не проверял!)

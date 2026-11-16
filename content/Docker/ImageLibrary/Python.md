@@ -33,5 +33,6 @@ docker run --rm -v ${pwd}:/app python:alpine python /app/script.py
 ```shell
 docker run -it --rm python:alpine python
 ```
+выйти из контейнера по `exit`
 
 > Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
