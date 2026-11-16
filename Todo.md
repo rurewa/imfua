@@ -125,7 +125,7 @@
 - Docker
     - Просмотр видеоролика +
     - hello-world +
-    - Congratulation
+    - Congratulation - не доделали. Осталось войти в контейнер
     - Самостоятельные работы:
         - Docker Images
         - Dockerfile
