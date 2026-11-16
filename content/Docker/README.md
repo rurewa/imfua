@@ -12,6 +12,7 @@
 
 ### Видео
 
+- [Что такое Docker?](https://yandex.ru/video/preview/16568526479627771059)
 - [Docker Для Начинающих за 1 Час / Docker с Нуля](https://rutube.ru/video/b60fe155ceb1fbe0edc837681fd51ef3/)
 - [Docker - Полный курс Docker Для Начинающих [3 ЧАСА]](https://rutube.ru/video/e2ee9fbaa95ba1fc563e548529bb83e1/)
 - [Docker. Что это такое? | Docker для начинающих](https://rutube.ru/video/c405ceaf110c3d144a90a46f2694fc9d/)
