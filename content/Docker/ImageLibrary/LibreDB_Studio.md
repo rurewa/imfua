@@ -23,6 +23,8 @@ docker run -d \
 ```
 где `admin@example.com` и `YourStrongPassword` ваши email и пароль
 
+Обезятельно задайте вопрос Ai-боту - "Что ты умеешь?"!
+
 Чтобы выйти из проекта в консоле, выполните `Ctrl+C`
 
 ### 2. Удалить проект
@@ -33,11 +35,11 @@ docker ps -a
 ```
 останавливаем его, если запущен
 ```shell
-docker stop competent_sinoussi
+docker stop имя_контейнера
 ```
 удаляем контейнер
 ```shell
-docker rm competent_sinoussi
+docker rm имя_контейнера
 ```
 получаем имя образа
 ```shell

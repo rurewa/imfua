@@ -4,7 +4,7 @@
 
 ## Коллекция готовых Docker-образов из Docker Hub и других источников
 
-1. [Docket Hub](/content/Docker/ImageLibrary/DockerHub.md)
+1. [DockerHub](/content/Docker/ImageLibrary/DockerHub.md)
 1. [Веб-сервер Nginx](/content/Docker/ImageLibrary/Nginx.md)
 1. [Welcome to Docker](/content/Docker/ImageLibrary/WelcomeToDocker.md)
 1. [Apache](/content/Docker/ImageLibrary/Apache.md)
