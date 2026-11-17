@@ -81,6 +81,14 @@ docker run --name my-mysql \
 ```bash
 docker ps
 ```
+Проверить, что лог БД включён:
+```shell
+docker exec -it my-mysql mysql -uroot -p123 -e "SHOW VARIABLES LIKE 'general_log'; SHOW VARIABLES LIKE 'slow_query_log'; SHOW VARIABLES LIKE 'log_output';"
+```
+Если  OFF то
+```shell
+docker exec -it my-mysql mysql -uroot -p123 -e "SET GLOBAL general_log = 'ON';"
+```
 
 ### 1.3. Очистите лог перед началом работы
 
