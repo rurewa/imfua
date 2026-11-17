@@ -409,6 +409,10 @@ docker exec my-mysql cat /var/lib/mysql/general.log \
 ```shell
 cat my_actions.log
 ```
+или
+```shell
+bat my_actions.log
+```
 
 В файле останутся **только ваши осмысленные SQL-команды** — без `Connect`, `Quit`, `SET NAMES`, `help_topic`, `time_zone`. Команды `SET GLOBAL` (если вы их выполняли) тоже попадут, но служебные `SET NAMES` и `SET autocommit` отфильтрованы.
 
