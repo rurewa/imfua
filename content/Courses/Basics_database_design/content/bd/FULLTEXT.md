@@ -56,6 +56,7 @@ docker volume rm mysql_data 2>/dev/null
 ```shell
 ls
 ```
+и
 ```shell
 rm general.log  index_dump_clean.sql  index_dump.sql  my_actions.log
 ```

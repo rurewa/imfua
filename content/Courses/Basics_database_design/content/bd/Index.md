@@ -50,6 +50,19 @@ docker rm my-mysql 2>/dev/null
 docker volume rm mysql_data 2>/dev/null
 ```
 
+Удалите файлы логов и дампов от предыдущих заданий!
+
+Например так (имена файлов могут отличаться!):
+
+Получить все файлы в каталоге `my-mysql`
+```shell
+ls
+```
+и
+```shell
+rm general.log  index_dump_clean.sql  index_dump.sql  my_actions.log
+```
+
 > ⚠️ **Не используйте `docker volume prune -a`** — эта команда удаляет **все** неиспользуемые volumes на хосте, а не только `mysql_data`.
 
 ### 1.2. Создайте новый контейнер
@@ -395,7 +408,6 @@ EXPLAIN ANALYZE SELECT * FROM orders WHERE amount > 1000;
 ```shell
 docker exec my-mysql ls -la /var/lib/mysql/general.log
 ```
-
 Файл должен иметь размер > 0 и принадлежать `mysql`.
 
 ### 11.2. Посмотреть последние строки
