@@ -22,7 +22,9 @@
 - [Лог MySQL](/content/Courses/Basics_database_design/content/Docs/log.md)
 - [Основные движки MySQL и их назначение](/content/Courses/Basics_database_design/content/Docs/storage_engine.md)
 - [Краткий обзор движков таблиц MySQL](https://habr.com/ru/articles/64851/)
+- [InnoDB](/content/Courses/Basics_database_design/content/Docs/InnoDB.md)
 - [Индексы](/content/Courses/Basics_database_design/content/Docs/Index.md)
+- [EXPLAIN](/content/Courses/Basics_database_design/content/Docs/EXPLAIN.md)
 - [Транзакции]()
 - [Подзапросы]()
 - [Управление пользователями и правами]()
@@ -47,6 +49,7 @@
   - [Лабораторная # 5 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_5.md)
   - [Лабораторная работа по Алиасам в MySQL](/content/Courses/Basics_database_design/content/bd/Aliases.md)
   - [Индексы в MySQL. Практическое руководство (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Index.md)
+  - [Полнотекстовый поиск (FULLTEXT) в MySQL. Практическое руководство](/content/Courses/Basics_database_design/content/bd/FULLTEXT.md)
 
 После освоения базовых операций SQL, представлению View и нормализации таблиц, что ещё надо освоить в Базах данных?
 

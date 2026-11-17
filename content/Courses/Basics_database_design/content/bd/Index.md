@@ -44,6 +44,7 @@ default-character-set = utf8mb4
 ### 1.1. Удалите старый контейнер и volume (если есть)
 
 ```shell
+# Останавливаем и удаляем только учебный контейнер (если он есть)
 docker stop my-mysql 2>/dev/null
 docker rm my-mysql 2>/dev/null
 docker volume rm mysql_data 2>/dev/null
@@ -81,9 +82,9 @@ docker run --name my-mysql \
 docker ps
 ```
 
-### 1.3. Важно: Очистите лог перед началом работы!
+### 1.3. Очистите лог перед началом работы
 
-При первом запуске MySQL загружает системные данные (справку и т.п.), которые попадут в лог. Чтобы начать с чистого листа:
+При первом запуске MySQL загружает системные данные (справку, часовые пояса), которые попадут в лог. Чтобы в `my_actions.log` были только **ваши** действия, очистите лог перед началом:
 
 ```shell
 docker exec -u mysql my-mysql sh -c ': > /var/lib/mysql/general.log'
@@ -163,6 +164,7 @@ SELECT * FROM orders;
 ```sql
 SHOW INDEX FROM orders;
 ```
+
 Вы увидите примерно такую картину:
 
 | Table | Key_name | Column_name | Non_unique |
@@ -197,18 +199,28 @@ EXPLAIN SELECT * FROM orders WHERE amount > 1000;
 | `key` | `NULL` | Индекс **не используется** |
 | `rows` | `6` | Предполагается просмотреть 6 строк |
 
-На 6 строках это не страшно. Но на 1 000 000 строк `full scan` — катастрофа.
+> 💡 На 6 строках `full scan` может быть **быстрее**, чем использование индекса — MySQL намеренно выбирает полный перебор для маленьких таблиц. Но на 1 000 000 строк `full scan` — катастрофа. `EXPLAIN` показывает план, а не гарантию оптимальности.
 
 ---
 
 ## 🔹 6. Эксперимент 3: `CREATE INDEX` и `EXPLAIN` после
 
 Создадим индекс по `amount`:
+
 ```sql
 CREATE INDEX idx_amount ON orders(amount);
 ```
 
+Убедимся, что он появился:
+
+```sql
+SHOW INDEX FROM orders;
+```
+
+В списке появится `idx_amount` с `Non_unique = 1` (неуникальный индекс).
+
 Повторим `EXPLAIN`:
+
 ```sql
 EXPLAIN SELECT * FROM orders WHERE amount > 1000;
 ```
@@ -243,7 +255,14 @@ EXPLAIN SELECT * FROM orders WHERE YEAR(order_date) = 2026;
 |----|-------------|-------|------|---------------|-----|------|-------|
 | 1 | SIMPLE | orders | **ALL** | NULL | NULL | 6 | Using where |
 
-Снова `type: ALL` — **full scan**, хотя индекс по `order_date` мы могли бы создать. Причина: **функция `YEAR()` в `WHERE`**. MySQL не может использовать индекс, потому что применяет функцию к каждой строке и только потом сравнивает.
+Снова `type: ALL` — **full scan**. Причина: **функция `YEAR()` в `WHERE`**. MySQL не может использовать индекс, потому что применяет функцию к каждой строке и только потом сравнивает.
+
+### Создадим индекс по `order_date`
+
+```sql
+CREATE INDEX idx_order_date ON orders(order_date);
+SHOW INDEX FROM orders;
+```
 
 ### Перепишем запрос без функции
 
@@ -258,11 +277,7 @@ WHERE order_date >= '2026-01-01' AND order_date < '2027-01-01';
 |----|-------------|-------|------|---------------|-----|------|-------|
 | 1 | SIMPLE | orders | **range** | idx_order_date | **idx_order_date** | 6 | Using where |
 
-Даже без явного `CREATE INDEX` по `order_date` — MySQL может использовать индекс, если он есть. Но давайте создадим его явно:
-```sql
-CREATE INDEX idx_order_date ON orders(order_date);
-```
-И повторим `EXPLAIN` — теперь точно будет `range` и `key: idx_order_date`.
+**Вывод:** `type: range`, `key: idx_order_date` — индекс используется. Функция убрана, условие переписано в виде диапазона.
 
 **Правило:** если в `WHERE` есть функция над столбцом (`YEAR()`, `MONTH()`, `DATE()`, `LOWER()` и т.д.) — индекс **не используется**. Переписывайте запрос без функции.
 
@@ -274,16 +289,35 @@ CREATE INDEX idx_order_date ON orders(order_date);
 
 ```sql
 CREATE INDEX idx_status_amount ON orders(status, amount);
+SHOW INDEX FROM orders;
+```
 
--- Использует индекс (status — первый столбец):
+**Проверим три запроса:**
+
+```sql
+-- ✅ Использует индекс (status — первый столбец):
 EXPLAIN SELECT * FROM orders WHERE status = 'paid';
 
--- Использует индекс (status + amount):
+-- ✅ Использует индекс (status + amount):
 EXPLAIN SELECT * FROM orders WHERE status = 'paid' AND amount > 1000;
 
--- НЕ использует индекс (amount — не первый столбец):
+-- ⚠️ Составной индекс НЕ используется (amount — не первый столбец)
 EXPLAIN SELECT * FROM orders WHERE amount > 1000;
 ```
+
+**Важно:** в третьем запросе MySQL **не будет** использовать `idx_status_amount`, но **может** использовать `idx_amount`, созданный ранее в разделе 6. Чтобы увидеть поведение именно составного индекса, временно удалите `idx_amount`:
+
+```sql
+DROP INDEX idx_amount ON orders;
+EXPLAIN SELECT * FROM orders WHERE amount > 1000;
+```
+
+Теперь `type` будет `ALL` или `index` (полный просмотр), `key` — `NULL` или другой индекс. Составной `idx_status_amount` для этого запроса не подходит.
+
+> 💡 После эксперимента можно вернуть `idx_amount`:
+> ```sql
+> CREATE INDEX idx_amount ON orders(amount);
+> ```
 
 **Правило левого префикса:** индекс `(A, B)` работает для `A` и `(A, B)`, но не для `B` или `(B, ...)`.
 
@@ -318,7 +352,7 @@ EXPLAIN SELECT customer_id, SUM(amount) FROM orders GROUP BY customer_id;
 | `type` | Что значит | Хорошо/плохо |
 |--------|------------|--------------|
 | `ALL` | Full scan — просмотр всех строк | ❌ Плохо |
-| `index` | Полный просмотр индекса | ⚠️ Средне |
+| `index` | Полный просмотр индекса (может быть быстрее `ALL`, если индекс содержит нужные столбцы) | ⚠️ Средне |
 | `range` | Диапазонный поиск по индексу | ✅ Хорошо |
 | `ref` | Точечный поиск по индексу | ✅ Хорошо |
 | `eq_ref` | Уникальный поиск (по PK или UNIQUE) | ✅ Отлично |
@@ -330,6 +364,12 @@ EXPLAIN SELECT customer_id, SUM(amount) FROM orders GROUP BY customer_id;
 | `Using where` | Фильтрация после чтения | ⚠️ Нормально |
 | `Using filesort` | Сортировка после чтения | ⚠️ Может быть медленно |
 | `Using temporary` | Временная таблица | ❌ Плохо |
+
+**Что дальше:** в MySQL 8.0.18+ есть `EXPLAIN ANALYZE` — он показывает **реальное** время выполнения каждого шага, а не оценку. Попробуйте:
+
+```sql
+EXPLAIN ANALYZE SELECT * FROM orders WHERE amount > 1000;
+```
 
 ---
 
@@ -360,16 +400,19 @@ docker exec my-mysql tail -n 30 /var/lib/mysql/general.log
 
 ```shell
 docker exec my-mysql cat /var/lib/mysql/general.log \
-  | grep -E "Query[[:space:]]+(CREATE|INSERT|SELECT|UPDATE|DELETE|ALTER|DROP|RENAME|DESCRIBE|EXPLAIN|SHOW|USE)" \
-  | grep -v -E "INSERT INTO help_|INSERT INTO time_zone|INSERT INTO mysql\.|SELECT \* FROM mysql\.general_log" \
+  | grep -E "Query[[:space:]]+(CREATE|INSERT|SELECT|UPDATE|DELETE|ALTER|DROP|RENAME|DESCRIBE|EXPLAIN|SHOW|USE|SET)" \
+  | grep -v -E "INSERT INTO help_|INSERT INTO time_zone|INSERT INTO mysql\.|SELECT \* FROM mysql\.general_log|SET NAMES|SET autocommit|SET sql_mode|SET character_set_results" \
   > my_actions.log
 ```
+
 Проверить:
 ```shell
 cat my_actions.log
 ```
 
-В файле останутся **только ваши осмысленные SQL-команды** — без `Connect`, `Quit`, `SET NAMES`, `help_topic`, `time_zone`.
+В файле останутся **только ваши осмысленные SQL-команды** — без `Connect`, `Quit`, `SET NAMES`, `help_topic`, `time_zone`. Команды `SET GLOBAL` (если вы их выполняли) тоже попадут, но служебные `SET NAMES` и `SET autocommit` отфильтрованы.
+
+> 💡 Если хотите видеть **только** `CREATE`/`INSERT`/`SELECT`/`EXPLAIN` и т.п., уберите `|SET` из первого `grep`. Но тогда ваши `SET GLOBAL` не попадут в лог.
 
 ### 11.4. Забрать полный лог на хост
 
@@ -403,11 +446,21 @@ docker exec -e MYSQL_PWD=123 my-mysql mysqldump -uroot \
   --single-transaction \
   index_practice > index_dump_clean.sql
 ```
-Посмотрите содержимое:
+Посмотрите содержимое (первые 30 строк):
 ```shell
-cat index_dump.sql
+head -n 30 index_dump.sql
 ```
-Дамп включает таблицы `customers` и `orders` с данными и индексами. При необходимости его можно использовать для восстановления базы.
+
+> ⚠️ В дамп попадут **все** индексы, созданные в экспериментах: `idx_amount`, `idx_order_date`, `idx_status_amount`, `idx_customer_amount`. Если хотите «чистый» дамп без экспериментальных индексов — удалите их перед дампом:
+> ```sql
+> DROP INDEX idx_amount ON orders;
+> DROP INDEX idx_order_date ON orders;
+> DROP INDEX idx_status_amount ON orders;
+> DROP INDEX idx_customer_amount ON orders;
+> ```
+> Или оставьте — они полезны, если восстанавливаете базу для продолжения экспериментов.
+
+Дамп включает таблицы `customers` и `orders` с данными и всеми индексами. При необходимости его можно использовать для восстановления базы.
 
 ---
 
@@ -427,6 +480,7 @@ cat index_dump.sql
 | `LIKE '%суффикс'` **не использует** индекс — только `LIKE 'префикс%'` |
 | Индекс ускоряет **чтение**, но замедляет **запись** — не индексируйте «на всякий случай» |
 | Лог действий удобно фильтровать через `grep` — это не требует SQL-запросов и работает на хосте |
+| `EXPLAIN ANALYZE` (MySQL 8.0.18+) показывает **реальное** время, а не оценку |
 
 ---
 

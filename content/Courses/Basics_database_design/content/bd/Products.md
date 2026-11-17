@@ -27,6 +27,11 @@ docker container prune
 ```shell
 docker volume prune -a
 ```
+Например так:
+```shell
+rm general.log  index_dump_clean.sql  index_dump.sql  my_actions.log
+```
+
 - [Шпаргалка по Docker](/content/Docker/DockerReminder.md)
 
 - Создайте отдельный каталог `products-mysql` (`mkdir products-mysql`) и перейдите в него (`cd products-mysql`).
