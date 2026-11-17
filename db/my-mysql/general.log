@@ -1,55 +1,44 @@
-2026-11-17T03:09:40.492661Z	    8 Connect	root@localhost on  using Socket
-2026-11-17T03:09:40.492874Z	    8 Query	select @@version_comment limit 1
-2026-11-17T03:09:52.213323Z	    8 Query	CREATE DATABASE fulltext_practice
+2026-11-17T03:33:17.605944Z	    8 Connect	root@localhost on  using Socket
+2026-11-17T03:33:17.606141Z	    8 Query	select @@version_comment limit 1
+2026-11-17T03:33:27.271053Z	    8 Query	CREATE DATABASE sort_practice
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci
-2026-11-17T03:09:52.217186Z	    8 Query	SELECT DATABASE()
-2026-11-17T03:09:52.218519Z	    8 Init DB	fulltext_practice
-2026-11-17T03:09:52.219728Z	    8 Query	show databases
-2026-11-17T03:09:52.224312Z	    8 Query	show tables
-2026-11-17T03:09:52.805253Z	    8 Query	CREATE TABLE articles (
+2026-11-17T03:33:27.275591Z	    8 Query	SELECT DATABASE()
+2026-11-17T03:33:27.276095Z	    8 Init DB	sort_practice
+2026-11-17T03:33:27.278630Z	    8 Query	show databases
+2026-11-17T03:33:27.283257Z	    8 Query	show tables
+2026-11-17T03:33:28.253716Z	    8 Query	CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    body TEXT NOT NULL,
-    author VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    customer_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'new',
+    order_date DATE NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    INDEX idx_customer (customer_id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
-2026-11-17T03:10:01.708011Z	    8 Query	INSERT INTO articles (title, body, author) VALUES
-  ('MySQL FULLTEXT search', 'MySQL provides full-text search capabilities. You can search for words in text columns using MATCH AGAINST syntax. FULLTEXT indexes are fast.', 'Иван'),
-  ('MySQL replication', 'MySQL replication allows you to replicate data from one server to another. It is useful for backup and scaling. FULLTEXT search works well with replication.', 'Мария'),
-  ('Optimizing MySQL queries', 'Query optimization is important for performance. Use indexes, EXPLAIN, and FULLTEXT search to speed up slow queries.', 'Пётр'),
-  ('InnoDB full-text search', 'InnoDB supports FULLTEXT indexes since MySQL 5.6. InnoDB full-text search is crash-safe and does not have the 50% threshold that MyISAM has.', 'Ольга'),
-  ('Boolean mode in MySQL', 'Boolean mode allows you to use operators like + (required), - (excluded), * (wildcard), and "..." (phrase) in FULLTEXT searches.', 'Алексей')
-2026-11-17T03:10:11.003886Z	    8 Query	SELECT * FROM articles
-2026-11-17T03:10:30.835231Z	    8 Query	EXPLAIN SELECT * FROM articles WHERE body LIKE '%replication%'
-2026-11-17T03:10:49.226643Z	    8 Query	CREATE FULLTEXT INDEX ft_articles ON articles(title, body)
-2026-11-17T03:10:55.578864Z	    8 Query	SHOW INDEX FROM articles
-2026-11-17T03:11:40.664180Z	    8 Query	SELECT id, title,
-       MATCH(title, body) AGAINST ('replication') AS score
-FROM articles
-WHERE MATCH(title, body) AGAINST ('replication')
-ORDER BY score DESC
-2026-11-17T03:12:17.297313Z	    8 Query	SELECT id, title, MATCH(title, body) AGAINST ('MySQL replication') AS score
-FROM articles
-WHERE MATCH(title, body) AGAINST ('MySQL replication')
-ORDER BY score DESC
-2026-11-17T03:12:28.905293Z	    8 Query	SELECT id, title
-FROM articles
-WHERE MATCH(title, body) AGAINST ('+MySQL -replication' IN BOOLEAN MODE)
-2026-11-17T03:12:37.248850Z	    8 Query	SELECT id, title FROM articles
-WHERE MATCH(title, body) AGAINST ('+MySQL -replication' IN BOOLEAN MODE)
-2026-11-17T03:12:45.249080Z	    8 Query	SELECT id, title FROM articles
-WHERE MATCH(title, body) AGAINST ('"query optimization"' IN BOOLEAN MODE)
-2026-11-17T03:12:52.953038Z	    8 Query	SELECT id, title FROM articles
-WHERE MATCH(title, body) AGAINST ('replicat*' IN BOOLEAN MODE)
-2026-11-17T03:13:08.873017Z	    8 Query	SELECT id, title FROM articles
-WHERE MATCH(title, body) AGAINST ('+MySQL +(index* partition*) -MyISAM' IN BOOLEAN MODE)
-2026-11-17T03:13:21.128275Z	    8 Query	SHOW VARIABLES LIKE 'innodb_ft_min_token_size'
-2026-11-17T03:14:29.716050Z	    8 Query	ALTER TABLE articles DROP INDEX ft_articles
-2026-11-17T03:14:30.317997Z	    8 Query	ALTER TABLE articles ADD FULLTEXT INDEX ft_articles (title, body)
-2026-11-17T03:15:26.366538Z	    8 Query	SHOW VARIABLES LIKE 'innodb_ft_enable_stopword'
-2026-11-17T03:16:01.277927Z	    8 Query	EXPLAIN SELECT * FROM articles WHERE MATCH(title, body) AGAINST ('replication')
-2026-11-17T03:16:17.749600Z	    8 Query	SELECT id, title
-FROM articles
-WHERE MATCH(title, body) AGAINST ('replication' WITH QUERY EXPANSION)
-2026-11-17T03:16:27.541220Z	    8 Quit	
+2026-11-17T03:33:47.237654Z	    8 Query	INSERT INTO orders (customer_id, status, order_date, amount)
+SELECT
+    FLOOR(1 + RAND() * 50),
+    ELT(FLOOR(1 + RAND() * 4), 'new', 'paid', 'cancelled', 'shipped'),
+    DATE_ADD('2026-01-01', INTERVAL FLOOR(RAND() * 365) DAY),
+    ROUND(100 + RAND() * 4900, 2)
+FROM
+    (SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5
+     UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10) a,
+    (SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5
+     UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10) b,
+    (SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5) c
+2026-11-17T03:33:53.509165Z	    8 Query	SELECT COUNT(*) FROM orders
+2026-11-17T03:34:19.028426Z	    8 Query	EXPLAIN SELECT * FROM orders ORDER BY amount DESC
+2026-11-17T03:34:25.844782Z	    8 Query	CREATE INDEX idx_amount ON orders(amount)
+2026-11-17T03:34:33.116848Z	    8 Query	EXPLAIN SELECT * FROM orders ORDER BY amount DESC
+2026-11-17T03:34:48.652003Z	    8 Query	EXPLAIN SELECT * FROM orders ORDER BY amount ASC
+2026-11-17T03:35:03.683901Z	    8 Query	CREATE INDEX idx_status_amount ON orders(status, amount)
+2026-11-17T03:35:09.227940Z	    8 Query	EXPLAIN SELECT * FROM orders ORDER BY status ASC, amount ASC
+2026-11-17T03:35:24.131171Z	    8 Query	EXPLAIN SELECT * FROM orders ORDER BY status ASC, amount DESC
+2026-11-17T03:35:30.179644Z	    8 Query	EXPLAIN SELECT status, COUNT(*) FROM orders GROUP BY status
+2026-11-17T03:35:39.970877Z	    8 Query	CREATE INDEX idx_status ON orders(status)
+2026-11-17T03:35:46.546921Z	    8 Query	EXPLAIN SELECT status, COUNT(*) FROM orders GROUP BY status
+2026-11-17T03:36:05.562692Z	    8 Query	EXPLAIN SELECT status, SUM(amount) FROM orders GROUP BY status
+2026-11-17T03:36:11.875455Z	    8 Query	CREATE INDEX idx_status_amount_cover ON orders(status, amount)
+2026-11-17T03:36:13.432460Z	    8 Query	EXPLAIN SELECT status, SUM(amount) FROM orders GROUP BY status
+2026-11-17T03:36:21.458266Z	    8 Quit	

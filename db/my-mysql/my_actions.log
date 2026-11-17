@@ -1,21 +1,18 @@
-2026-11-17T03:09:52.213323Z	    8 Query	CREATE DATABASE fulltext_practice
-2026-11-17T03:09:52.217186Z	    8 Query	SELECT DATABASE()
-2026-11-17T03:09:52.805253Z	    8 Query	CREATE TABLE articles (
-2026-11-17T03:10:01.708011Z	    8 Query	INSERT INTO articles (title, body, author) VALUES
-2026-11-17T03:10:11.003886Z	    8 Query	SELECT * FROM articles
-2026-11-17T03:10:30.835231Z	    8 Query	EXPLAIN SELECT * FROM articles WHERE body LIKE '%replication%'
-2026-11-17T03:10:49.226643Z	    8 Query	CREATE FULLTEXT INDEX ft_articles ON articles(title, body)
-2026-11-17T03:10:55.578864Z	    8 Query	SHOW INDEX FROM articles
-2026-11-17T03:11:40.664180Z	    8 Query	SELECT id, title,
-2026-11-17T03:12:17.297313Z	    8 Query	SELECT id, title, MATCH(title, body) AGAINST ('MySQL replication') AS score
-2026-11-17T03:12:28.905293Z	    8 Query	SELECT id, title
-2026-11-17T03:12:37.248850Z	    8 Query	SELECT id, title FROM articles
-2026-11-17T03:12:45.249080Z	    8 Query	SELECT id, title FROM articles
-2026-11-17T03:12:52.953038Z	    8 Query	SELECT id, title FROM articles
-2026-11-17T03:13:08.873017Z	    8 Query	SELECT id, title FROM articles
-2026-11-17T03:13:21.128275Z	    8 Query	SHOW VARIABLES LIKE 'innodb_ft_min_token_size'
-2026-11-17T03:14:29.716050Z	    8 Query	ALTER TABLE articles DROP INDEX ft_articles
-2026-11-17T03:14:30.317997Z	    8 Query	ALTER TABLE articles ADD FULLTEXT INDEX ft_articles (title, body)
-2026-11-17T03:15:26.366538Z	    8 Query	SHOW VARIABLES LIKE 'innodb_ft_enable_stopword'
-2026-11-17T03:16:01.277927Z	    8 Query	EXPLAIN SELECT * FROM articles WHERE MATCH(title, body) AGAINST ('replication')
-2026-11-17T03:16:17.749600Z	    8 Query	SELECT id, title
+2026-11-17T03:33:27.271053Z	    8 Query	CREATE DATABASE sort_practice
+2026-11-17T03:33:27.275591Z	    8 Query	SELECT DATABASE()
+2026-11-17T03:33:28.253716Z	    8 Query	CREATE TABLE orders (
+2026-11-17T03:33:47.237654Z	    8 Query	INSERT INTO orders (customer_id, status, order_date, amount)
+2026-11-17T03:33:53.509165Z	    8 Query	SELECT COUNT(*) FROM orders
+2026-11-17T03:34:19.028426Z	    8 Query	EXPLAIN SELECT * FROM orders ORDER BY amount DESC
+2026-11-17T03:34:25.844782Z	    8 Query	CREATE INDEX idx_amount ON orders(amount)
+2026-11-17T03:34:33.116848Z	    8 Query	EXPLAIN SELECT * FROM orders ORDER BY amount DESC
+2026-11-17T03:34:48.652003Z	    8 Query	EXPLAIN SELECT * FROM orders ORDER BY amount ASC
+2026-11-17T03:35:03.683901Z	    8 Query	CREATE INDEX idx_status_amount ON orders(status, amount)
+2026-11-17T03:35:09.227940Z	    8 Query	EXPLAIN SELECT * FROM orders ORDER BY status ASC, amount ASC
+2026-11-17T03:35:24.131171Z	    8 Query	EXPLAIN SELECT * FROM orders ORDER BY status ASC, amount DESC
+2026-11-17T03:35:30.179644Z	    8 Query	EXPLAIN SELECT status, COUNT(*) FROM orders GROUP BY status
+2026-11-17T03:35:39.970877Z	    8 Query	CREATE INDEX idx_status ON orders(status)
+2026-11-17T03:35:46.546921Z	    8 Query	EXPLAIN SELECT status, COUNT(*) FROM orders GROUP BY status
+2026-11-17T03:36:05.562692Z	    8 Query	EXPLAIN SELECT status, SUM(amount) FROM orders GROUP BY status
+2026-11-17T03:36:11.875455Z	    8 Query	CREATE INDEX idx_status_amount_cover ON orders(status, amount)
+2026-11-17T03:36:13.432460Z	    8 Query	EXPLAIN SELECT status, SUM(amount) FROM orders GROUP BY status

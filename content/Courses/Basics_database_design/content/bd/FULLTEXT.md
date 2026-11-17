@@ -50,7 +50,12 @@ docker volume rm mysql_data 2>/dev/null
 ```
 Удалите файлы логов и дампов от предыдущих заданий!
 
-Например так:
+Например так (имена файлов могут отличаться!):
+
+Получить все файлы в каталоге `my-mysql`
+```shell
+ls
+```
 ```shell
 rm general.log  index_dump_clean.sql  index_dump.sql  my_actions.log
 ```

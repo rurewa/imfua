@@ -50,6 +50,7 @@
   - [Лабораторная работа по Алиасам в MySQL](/content/Courses/Basics_database_design/content/bd/Aliases.md)
   - [Индексы в MySQL. Практическое руководство (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Index.md)
   - [Полнотекстовый поиск (FULLTEXT) в MySQL. Практическое руководство](/content/Courses/Basics_database_design/content/bd/FULLTEXT.md)
+  - [Ускорение сортировки и группировки в MySQL (ORDER BY / GROUP BY)](/content/Courses/Basics_database_design/content/bd/ORDER_BY_GROUP_BY.md)
 
 После освоения базовых операций SQL, представлению View и нормализации таблиц, что ещё надо освоить в Базах данных?
 
