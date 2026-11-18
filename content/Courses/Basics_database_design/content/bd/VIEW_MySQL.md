@@ -13,8 +13,7 @@
 
 ## 🔹 0. Настройка `my.cnf`
 
-Замените содержимое файла `my.cnf` на это:
-
+Замените содержимое файла `my.cnf` в **WSL** на это:
 ```ini
 [mysqld]
 character-set-server = utf8mb4

@@ -1,5 +1,7 @@
 # Интерактивная работа с MySQL в изолированном окружении Docker № 1
 
+> **Задание выполнять в VS Code - Git-Bash!**
+
 **Задачи:**
 - запустить «чистый» контейнер
 - подключиться к нему
@@ -39,7 +41,7 @@ docker volume prune -a
 
 **Создание каталога проекта:**
 
-- Создайте отдельный каталог `my-mysql` и перейдите в него (`cd my-mysql`).
+- Создайте в **WSL** каталог с именем `my-mysql` и перейдите в него (`cd my-mysql`).
 - Создайте в каталоге `my-mysql` файл `my.cnf` с содержимым (не забудьте перейти в папку `my-mysql`):
 ```ini
 [mysqld]
@@ -57,13 +59,43 @@ default-character-set = utf8mb4
 ```
 Параметры `general_log = 1` и `general_log_file = /var/lib/mysql/general.log` нужны для того, чтобы MySQL вела файл журнала записей (лог).
 
-Контейнер с официального образа **MySQL**:
+> ⚠️ **Важно для Windows:** сохраняйте `my.cnf` в кодировке **UTF-8 без BOM** и с line endings **LF** (Unix).
+>
+> Если файл сохранён с BOM или CRLF, MySQL его **молча проигнорирует** — `general_log` не включится, и лог не будет создан.
+>
+> **Самый надёжный способ** — создать файл прямо в WSL через heredoc:
+>
+> ```bash
+> cat > my.cnf <<'EOF'
+> [mysqld]
+> character-set-server = utf8mb4
+> collation-server = utf8mb4_unicode_ci
+> general_log = 1
+> general_log_file = /var/lib/mysql/general.log
+> log_output = FILE
+>
+> [client]
+> default-character-set = utf8mb4
+>
+> [mysql]
+> default-character-set = utf8mb4
+> EOF
+> ```
+>
+> Проверить, что файл корректный:
+> ```bash
+> hexdump -C my.cnf | head -1
+> # должно начинаться с 5b 6d 79 73 71 6c 64, НЕ с ef bb bf
+> ```
+>
+> Если файл уже сохранён с артефактами — исправьте:
+> ```bash
+> sed -i '1s/^\xEF\xBB\xBF//' my.cnf   # убрать BOM
+> sed -i 's/\r$//' my.cnf                # убрать CRLF
+> docker restart my-mysql                # применить
+> ```
 
-Power Shell
-```shell
-docker run --name my-mysql -e MYSQL_ROOT_PASSWORD=123 -e LANG=C.UTF-8 -v mysql_data:/var/lib/mysql -v ${PWD}/my.cnf:/etc/mysql/conf.d/my.cnf -d mysql:8.0
-```
-Git-Bash:
+Контейнер с официального образа **MySQL**:
 ```bash
 docker run --name my-mysql \
   -e MYSQL_ROOT_PASSWORD=123 \

@@ -7,7 +7,7 @@
 
 > **Работу можно выполнять в созданном ранее каталоге `my-mysql`, в котором уже есть файл `my.cnf`**
 
-Замените старое файла содержимое файла `my.cnf` на это:
+Замените старое файла содержимое файла `my.cnf` в **WSL** на это:
 ```ini
 [mysqld]
 character-set-server = utf8mb4
@@ -22,6 +22,42 @@ default-character-set = utf8mb4
 default-character-set = utf8mb4
 ```
 Параметры `general_log = 1` и `general_log_file = /var/lib/mysql/general.log` нужны для того, чтобы MySQL вела файл журнала записей (лог).
+
+> ⚠️ **Важно для Windows:** сохраняйте `my.cnf` в кодировке **UTF-8 без BOM** и с line endings **LF** (Unix).
+>
+> Если файл сохранён с BOM или CRLF, MySQL его **молча проигнорирует** — `general_log` не включится, и лог не будет создан.
+>
+> **Самый надёжный способ** — создать файл прямо в WSL через heredoc:
+>
+> ```bash
+> cat > my.cnf <<'EOF'
+> [mysqld]
+> character-set-server = utf8mb4
+> collation-server = utf8mb4_unicode_ci
+> general_log = 1
+> general_log_file = /var/lib/mysql/general.log
+> log_output = FILE
+>
+> [client]
+> default-character-set = utf8mb4
+>
+> [mysql]
+> default-character-set = utf8mb4
+> EOF
+> ```
+>
+> Проверить, что файл корректный:
+> ```bash
+> hexdump -C my.cnf | head -1
+> # должно начинаться с 5b 6d 79 73 71 6c 64, НЕ с ef bb bf
+> ```
+>
+> Если файл уже сохранён с артефактами — исправьте:
+> ```bash
+> sed -i '1s/^\xEF\xBB\xBF//' my.cnf   # убрать BOM
+> sed -i 's/\r$//' my.cnf                # убрать CRLF
+> docker restart my-mysql                # применить
+> ```
 
 после замены `my.cnf` перезапустить контейнер (если вы не удаляли старый контейнер), чтобы настройки применились:
 ```shell

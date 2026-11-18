@@ -1,7 +1,7 @@
 # Основные SQL-операции на примере двух таблиц «products 1» и «products 2»
 
 
-> **Задание выполнять в VS Code - Git-Bash - Docker CLI!!**
+> **Задание выполнять в VS Code - Git-Bash - Docker CLI!**
 
 Все команды и запросы можно выполнить в любом клиенте **MySQL 8.0.31+** (в Docker-контейнере). Для MySQL 8.0.31+ доступны операторы `EXCEPT` и `INTERSECT`; для более старых версий даны альтернативы.
 
@@ -34,7 +34,7 @@ rm general.log  index_dump_clean.sql  index_dump.sql  my_actions.log
 
 - [Шпаргалка по Docker](/content/Docker/DockerReminder.md)
 
-- Создайте отдельный каталог `products-mysql` (`mkdir products-mysql`) и перейдите в него (`cd products-mysql`).
+- В **WSL** создайте отдельный каталог `products-mysql` (`mkdir products-mysql`) и перейдите в него (`cd products-mysql`).
 - Создайте в каталоге `products-mysql` файл `my.cnf` (для корректного отображения кириллицы) с содержимым:
 ```ini
 [mysqld]
