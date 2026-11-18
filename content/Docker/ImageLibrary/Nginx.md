@@ -255,7 +255,6 @@ docker start my-nginx
 ```shell
 docker restart my-nginx
 ```
-
 Зайти в контейнер
 ```shell
 docker exec -it my-nginx /bin/bash
