@@ -51,10 +51,15 @@ docker volume rm mysql_data 2>/dev/null
 
 > ⚠️ **Не используйте `docker volume prune -a`** — эта команда удаляет **все** неиспользуемые volumes на хосте, а не только `mysql_data`.
 
+**Удалите файлы логов и дампов от предыдущих заданий!**
+
+Например так (имена файлов могут отличаться!):
+
 Получить все файлы в каталоге `my-mysql`
 ```shell
 ls
 ```
+и
 ```shell
 rm general.log  index_dump_clean.sql  index_dump.sql  my_actions.log
 ```

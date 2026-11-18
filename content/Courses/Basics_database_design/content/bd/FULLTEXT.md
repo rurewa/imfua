@@ -48,7 +48,8 @@ docker stop my-mysql 2>/dev/null
 docker rm my-mysql 2>/dev/null
 docker volume rm mysql_data 2>/dev/null
 ```
-Удалите файлы логов и дампов от предыдущих заданий!
+
+**Удалите файлы логов и дампов от предыдущих заданий!**
 
 Например так (имена файлов могут отличаться!):
 
