@@ -136,10 +136,39 @@ writing manifest
 success
 ```
 
-
 - [Открываем в браузере http://localhost:81/](http://localhost:81/)
 
+Укажите e-mail и придумайте пароль для локального личного кабинета Open WebUI
 
+Если локальная модель не доступна, то приступайте с шагу ниже.
+
+### Полная очистка Open WebUI (безопасная)
+
+1. Останавливаем и удаляем контейнер
+```shell
+docker stop open-webui
+docker rm open-webui
+```
+
+2. УДАЛЯЕМ том с данными (именно это сбросит кэш и настройки)
+```shell
+docker volume rm open-webui
+```
+
+3. Запускаем контейнер заново с чистого листа
+```shell
+docker run -d \
+  -p 81:8080 \
+  --name open-webui \
+  --restart always \
+  -v open-webui:/app/backend/data \
+  -e OLLAMA_BASE_URL=http://ollama:11434 \
+  --link ollama \
+  ghcr.io/open-webui/open-webui:main
+```
+Подождите 20–30 секунд, чтобы база данных внутри контейнера успела полностью проинициализироваться.
+
+[Снова перейдите по адресу: http://localhost:81](http://localhost:81)
 
 > Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
 
