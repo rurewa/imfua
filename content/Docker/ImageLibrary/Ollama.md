@@ -29,7 +29,7 @@ docker exec -it ollama ollama run phi4
 
 ---
 
-### Вариант 2. Open WebUI и Ollama
+### Вариант 2. Ollama + Open WebUI
 
 ```shell
 docker run -d -p 3000:8081 -v ollama:/root/.ollama -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:ollama
@@ -58,7 +58,7 @@ docker exec -it open-webui ollama pull llama3.2:1b
 docker exec -it open-webui ollama list
 ```
 
-### Вариант 3. Open WebUI и Ollama в двух контейнерах
+### Вариант 3. Ollama + Open WebUI в двух контейнерах
 
 Остановим и удалим контейнер с 2 вариантом Open WebUI
 ```shell
@@ -100,7 +100,7 @@ docker exec -it ollama ollama list
 docker exec -it ollama ollama rm llama3.2
 ```
 
-Если модель не установиться и если у вас нет ВПН, то можно выплнить импорт модели через **Hugging Face**
+Если модель не установиться и если у вас нет ВПН, то можно выполнить импорт модели через **Hugging Face**
 
 https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/tree/main?spm=a2ty_o01.29997173.0.0.7f59c921DR5mIT
 
@@ -142,7 +142,7 @@ success
 
 Если локальная модель не доступна, то приступайте с шагу ниже.
 
-### Полная очистка Open WebUI (безопасная)
+### Опционально: полная очистка Open WebUI (безопасная)
 
 1. Останавливаем и удаляем контейнер
 ```shell
