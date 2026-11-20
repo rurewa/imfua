@@ -1,0 +1,17 @@
+## Все лабораторные по Базам Данных
+
+- [SQL-команды для создания и заполнения нормализованных таблиц](/content/Courses/Basics_database_design/content/bd/Lesson_1.md)
+- [Интерактивная работа с MySQL в изолированном окружении Docker № 1](/content/Courses/Basics_database_design/content/bd/Begin_MySQL_1.md)
+- [Интерактивная работа с MySQL в изолированном окружении Docker № 2](/content/Courses/Basics_database_design/content/bd/Begin_MySQL_2.md)
+- [Основные операции на примере двух таблиц «products 1» и «products 2»](/content/Courses/Basics_database_design/content/bd/Products.md)
+- [Руководство по представлениям (VIEW) в MySQL](/content/Courses/Basics_database_design/content/bd/VIEW_MySQL.md)
+- [Лабораторная # 1 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_1.md)
+- [Лабораторная # 2 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_2.md)
+- [Лабораторная # 3 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_3.md)
+- [Лабораторная # 4 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_4.md)
+- [Лабораторная # 5 работа по нормализации данных в БД (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Normalization_5.md)
+- [Лабораторная работа по Алиасам в MySQL](/content/Courses/Basics_database_design/content/bd/Aliases.md)
+- [Индексы в MySQL. Практическое руководство (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Index.md)
+- [Полнотекстовый поиск (FULLTEXT) в MySQL. Практическое руководство](/content/Courses/Basics_database_design/content/bd/FULLTEXT.md)
+- [Ускорение сортировки и группировки в MySQL (ORDER BY / GROUP BY)](/content/Courses/Basics_database_design/content/bd/ORDER_BY_GROUP_BY.md)
+- [Индексы и JOIN](/content/Courses/Basics_database_design/content/bd/Index_JOIN.md)

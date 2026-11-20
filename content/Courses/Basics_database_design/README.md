@@ -37,7 +37,7 @@
 - Docker
   - [Docker для начинающих](/content/Docker/getDocker.md)
   - [Шпаркагла по Docker](/content/Docker/DockerReminder.md)
-- Базы Данных
+- [Базы Данных](/content/Courses/Basics_database_design/content/bd/README.md)
   - [Интерактивная работа с MySQL в изолированном окружении Docker № 1](/content/Courses/Basics_database_design/content/bd/Begin_MySQL_1.md)
   - [Интерактивная работа с MySQL в изолированном окружении Docker № 2](/content/Courses/Basics_database_design/content/bd/Begin_MySQL_2.md)
   - [Основные операции на примере двух таблиц «products 1» и «products 2»](/content/Courses/Basics_database_design/content/bd/Products.md)
@@ -51,7 +51,7 @@
   - [Индексы в MySQL. Практическое руководство (с ведением лога)](/content/Courses/Basics_database_design/content/bd/Index.md)
   - [Полнотекстовый поиск (FULLTEXT) в MySQL. Практическое руководство](/content/Courses/Basics_database_design/content/bd/FULLTEXT.md)
   - [Ускорение сортировки и группировки в MySQL (ORDER BY / GROUP BY)](/content/Courses/Basics_database_design/content/bd/ORDER_BY_GROUP_BY.md)
-  - [Индексы и `JOIN`](/content/Courses/Basics_database_design/content/bd/Index_JOIN.md)
+  - [Индексы и JOIN](/content/Courses/Basics_database_design/content/bd/Index_JOIN.md)
 
 После освоения базовых операций SQL, представлению View и нормализации таблиц, что ещё надо освоить в Базах данных?
 
