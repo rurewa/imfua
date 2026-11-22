@@ -48,11 +48,14 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_NUM_THREADS=6  # Оптимизация для i7-8550U (оставляем 2 потока системе)
     dns:
       - 8.8.8.8
       - 1.1.1.1
-    environment:
-      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - ai-network
 
   # 2. Веб-интерфейс Open WebUI
   open-webui:
@@ -67,10 +70,16 @@ services:
       - OLLAMA_BASE_URL=http://ollama:11434
     depends_on:
       - ollama
+    networks:
+      - ai-network
 
 volumes:
   ollama_data:
   open-webui_data:
+
+networks:
+  ai-network:
+    driver: bridge
 ```
 
 Сохраните файл (`Ctrl+O`, `Enter`, `Ctrl+X` в nano).
@@ -99,19 +108,15 @@ docker compose ps
 
 Оба контейнера должны иметь статус `Up` (или `Up (healthy)` для open-webui).
 
+
 ---
 
 ## Шаг 4. Скачивание модели с Hugging Face
 
 1. Откройте браузер и перейдите на страницу с квантованными моделями. Например:
-   * **Llama 3.2 (3B):** https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/tree/main
-   * **Qwen 2.5 (7B):** https://huggingface.co/bartowski/Qwen2.5-7B-Instruct-GGUF/tree/main
-
-2. Скачайте файл с расширением `.gguf`. Рекомендуется вариант **`Q4_K_M`** — оптимальный баланс качества и скорости. Например:
-   ```
-   Llama-3.2-3B-Instruct-Q4_K_M.gguf
-   ```
-
+   * **Qwen 2.5 (7B):** https://huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf?spm=a2ty_o01.29997173.0.0.7f59c921Zpv67C&file=Qwen2.5-1.5B-Instruct-Q4_K_M.gguf
+   * **Llama-3.2-1B:** https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf?spm=a2ty_o01.29997173.0.0.7f59c921Zpv67C&file=Llama-3.2-1B-Instruct-Q4_K_M.gguf
+2. Скачайте файл с расширением `.gguf`. Рекомендуется вариант **`Q4_K_M`** — оптимальный баланс качества и скорости. Например: `Qwen2.5-1.5B-Instruct-Q4_K_M.gguf`
 3. Файл сохранится в папку `~/Downloads` (или `~/Загрузки`).
 
 ---
@@ -122,10 +127,10 @@ docker compose ps
 
 ```bash
 # Если файл в ~/Downloads
-docker cp ~/Downloads/Llama-3.2-3B-Instruct-Q4_K_M.gguf ollama:/tmp/model.gguf
+docker cp ~/Downloads/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf ollama:/tmp/light-model.gguf
 
 # ИЛИ если файл в ~/Загрузки
-docker cp ~/Загрузки/Llama-3.2-3B-Instruct-Q4_K_M.gguf ollama:/tmp/model.gguf
+docker cp ~/Загрузки/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf ollama:/tmp/light-model.gguf
 ```
 
 ⚠️ Замените имя файла на то, которое вы скачали.
@@ -138,24 +143,20 @@ docker cp ~/Загрузки/Llama-3.2-3B-Instruct-Q4_K_M.gguf ollama:/tmp/model
 
 ### 6.1. Создайте файл Modelfile внутри контейнера:
 
-```bash
-docker exec -it ollama sh -c 'echo "FROM /tmp/model.gguf" > /tmp/Modelfile'
+1. Создаем файл настроек
+
+```shell
+docker exec -it ollama sh -c 'cat > /tmp/Modelfile-light << EOF
+FROM /tmp/light-model.gguf
+PARAMETER num_ctx 8192
+PARAMETER num_thread 6
+EOF'
 ```
 
-### 6.2. Соберите модель с именем `my-llama3.2`:
+2. Собираем модель с понятным именем
 
-```bash
-docker exec -it ollama ollama create my-llama3.2 -f /tmp/Modelfile
-```
-
-Вы увидите процесс сборки:
-```
-transferring model data
-using existing layer sha256:...
-creating new layer sha256:...
-creating new metadata layer
-writing manifest
-success
+```shell
+docker exec -it ollama ollama create qwen-1.5b-fast -f /tmp/Modelfile-light
 ```
 
 ### 6.3. Проверьте, что модель появилась:
@@ -166,8 +167,9 @@ docker exec -it ollama ollama list
 
 Должен быть вывод вроде:
 ```
-NAME                  ID              SIZE      MODIFIED
-my-llama3.2:latest    56b0dceba6e9    2.0 GB    1 minute ago
+NAME                     ID              SIZE      MODIFIED
+qwen-1.5b-fast:latest    27e5ef3c667e    986 MB    3 seconds ago
+llama3.2-16k:latest      48e9516860e0    2.0 GB    32 hours ago
 ```
 
 ---
@@ -187,39 +189,49 @@ my-llama3.2:latest    56b0dceba6e9    2.0 GB    1 minute ago
 
 ### Управление стеком (из папки `~/ollama-stack`):
 
-```bash
+```shell
 # Остановить все контейнеры
 docker compose stop
-
-# Запустить снова
+```
+Запустить снова
+```shell
 docker compose start
-
-# Перезапустить
+```
+Перезапустить
+```shell
 docker compose restart
-
-# Посмотреть логи
+```
+Посмотреть логи
+```shell
 docker compose logs -f
-
-# Полное удаление (контейнеры + volumes, т.е. ВСЕ данные)
+```
+Получить статистику по запущенным контейнерам
+```shell
+docker stats
+```
+Полное удаление (контейнеры + volumes, т.е. ВСЕ данные)
+```shell
 docker compose down -v
 ```
 
 ### Управление моделями:
 
-```bash
+```shell
 # Список моделей
 docker exec -it ollama ollama list
-
-# Удалить модель
+```
+Удалить модель
+```shell
 docker exec -it ollama ollama rm my-llama3.2
-
-# Очистить временные файлы после импорта
+```
+Очистить временные файлы после импорта
+```shell
 docker exec -it ollama rm /tmp/model.gguf /tmp/Modelfile
 ```
 
 ### Добавление новой модели (повтор Шагов 4–6):
 
-```bash
+```shell
 # 1. Скопировать новый файл
 docker cp ~/Downloads/НоваяМодель.gguf ollama:/tmp/newmodel.gguf
 
