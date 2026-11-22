@@ -9,21 +9,17 @@ winget install Docker.DockerDesktop
 - **Docker Desktop** должен быть запущен!
 - Папка проекта должна быть в разрешённых для **Docker Desktop** дисках (`Settings` → `Resources` → `File Sharing`)
 - Первый запуск может быть долгим
+- В **Docker Desktop Windows** настройте **File sharing** - `C:\`, **WSL integration** - `ON/Ubuntu` и **Choose Virtual Mashine** - `WSL 2`
 
 **Alt Linux 11**
 ```shell
-apt-get install docker-engine docker-compose
+apt-get install docker-engine docker-compose && usermod ИМЯ_ПОЛЬЗОВАТЕЛЯ -aG docker
 ```
-**macOS**
+**MacOS**
 ```shell
 brew install --cask docker
 ```
-
 > ⚠️ В **Linux** не забудьте добавить пользователя в группу `docker`, чтобы работать без `sudo`:
-> ```shell
-> sudo usermod -aG docker $USER
-> newgrp docker
-> ```
 > В **macOS** и **Windows** этого делать не нужно — Docker Desktop работает через виртуальную машину.
 
 ---
