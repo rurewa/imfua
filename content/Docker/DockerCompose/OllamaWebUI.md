@@ -112,7 +112,6 @@ docker compose ps
 ## Шаг 5. Копирование модели в контейнер Ollama
 
 Скопируйте скачанный файл в папку `/tmp` внутри контейнера `ollama`:
-
 ```bash
 # Если файл в ~/Downloads (английская версия):
 docker cp ~/Downloads/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf ollama:/tmp/light-model.gguf
