@@ -35,6 +35,18 @@ docker rm -f $(docker ps -aq)
 ```shell
 docker volume prune -a
 ```
+
+Опционально: можно удалить образы и кеш сборок в Docker
+
+Удаление всех образов
+```shell
+docker image prune -a
+```
+Очистить кэш всех сборок:
+```shell
+docker builder prune -a
+```
+
 - [Подробней про управление Docker в шпаргалке](/content/Docker/DockerReminder.md)
 
 

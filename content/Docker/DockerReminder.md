@@ -78,6 +78,7 @@ docker volume prune -a
 ```shell
 docker container prune
 ```
+Удаление всех образов
 ```shell
 docker image prune -a
 ```
