@@ -31,7 +31,7 @@ mkdir -p ~/ollama-stack && cd ~/ollama-stack
 
 ---
 
-## Шаг 2. Создание файла `docker-compose.yml`
+## Шаг 2. Создание файла `compose.yml`
 
 Создайте файл `docker-compose.yml` в этой папке:
 
@@ -83,7 +83,7 @@ networks:
   ai-network:
     driver: bridge
 ```
-*(Сохраните файл: `Ctrl+O`, `Enter`, `Ctrl+X` в nano. Примечание: строка `version` удалена, так как в современных Docker Compose она устарела и вызывает предупреждения).*
+*(Сохраните файл: `Ctrl+S` и `Ctrl+X` для выхода из **nano**.
 
 ---
 
@@ -239,5 +239,9 @@ docker exec -it ollama ollama create my-smart-model -f /tmp/Modelfile-adv
 
 
 **Результат оформить в виде отдельного `README.md` со скриншотами результатов ваших действий и прислать ссылку преподавателю.**
+
+### Добавить модель microsoft_Phi-4-mini
+
+https://huggingface.co/bartowski/microsoft_Phi-4-mini-instruct-GGUF/resolve/main/microsoft_Phi-4-mini-instruct-Q4_K_M.gguf?download=true
 
 > Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
