@@ -50,7 +50,7 @@ docker container prune $(docker ps -q)
 ```shell
 docker ps -a
 ```
-![Тут нужен скриншот вывода]()
+![Тут нужен скриншот вывода](/content/Docker/Dockerfile/img/)
 
 - Опционально можно удалить ненужные образы. Показать текущие образы:
 ```shell
@@ -95,7 +95,7 @@ docker run -d --name my-nginx -p 80:80 nginx
 docker ps -a
 ```
 
-![Тут нужен скриншот]()
+![Тут нужен скриншот](/content/Docker/ImageLibrary/img/12.png)
 
 Показать загруженный на ваш компьютер образ
 ```shell
