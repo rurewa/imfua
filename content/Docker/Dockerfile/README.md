@@ -1,4 +1,6 @@
-## Dockerfile проекты
+## Лабораторные работы Docker Dockerfile CLI
+
+(CLI - command line interface, командная строка)
 
 - [Что такое Dockerfile?](/content/Docker/Docs/DockerfileInfo.md)
 
@@ -25,7 +27,7 @@
 
 ---
 
-Самостоятельно создать и выполнить задания с `Dockerfile`:
+Самостоятельно, при помощи доступной вам нейросети создать и выполнить задания с `Dockerfile` WSL:
 
 - PostgreSQL + Adminer
 - PostgreSQL + pgAdmin

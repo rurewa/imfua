@@ -1,6 +1,8 @@
-# Docker CLI
+# Лабораторные работы Docker Image CLI
 
 (CLI - command line interface, командная строка)
+
+- [Что такое Docker?](/content/Docker/Docs/ThatIsDocker.md)
 
 ## Коллекция готовых Docker-образов из Docker Hub и других источников
 

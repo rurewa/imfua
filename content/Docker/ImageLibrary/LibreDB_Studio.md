@@ -83,6 +83,8 @@ docker images
 docker image rm ghcr.io/libredb/libredb-studio:latest
 ```
 
+**Результат оформить в виде отдельного `README.md` со скриншотами результатов ваших действий и прислать ссылку преподавателю.**
+
 ### Полезные ссылки
 
 - [LibreDB Studio - анонс новой версии](https://www.opennet.ru/opennews/art.shtml?num=66216)

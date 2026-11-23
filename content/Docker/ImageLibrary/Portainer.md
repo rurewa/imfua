@@ -76,4 +76,6 @@ docker run -d \
 - `docker run --rm -v portainer_data:/data portainer/helper-reset-password`
 - Скопируйте логин и пароль после строки "Use the following password to login:"
 
+**Результат оформить в виде отдельного `README.md` со скриншотами результатов ваших действий и прислать ссылку преподавателю.**
+
 > Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
