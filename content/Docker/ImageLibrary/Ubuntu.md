@@ -66,11 +66,11 @@ Run 'docker run --help' for more information
 
 Установите что-нибудь внутри, например:
 ```shell
-apt update && apt install neofetch
+apt update && apt install fastfetch
 ```
-или **fastfetch**, если не находит **neofetch**
+или **neofetch**, если не находит **fastfetch**
 
-Выполнить fastfetch:
+Выполнить **fastfetch**:
 ```shell
 fastfetch
 ```
