@@ -29,6 +29,6 @@
 1. [Jira](/content/Docker/ImageLibrary/Jira.md)
 1. [Ollama и Open WebUI+Ollama](/content/Docker/ImageLibrary/Ollama.md)
 1. [LibreDB Studio](/content/Docker/ImageLibrary/LibreDB_Studio.md)
-1. []()
+1. [Doom/Freedoom](/content/Docker/ImageLibrary/Doom.md)
 
 > Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
