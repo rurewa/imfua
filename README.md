@@ -176,20 +176,20 @@ git config --global user.email "rosa@mail.ru"
             - После перезагрузки найти **Ubuntu** можно из **Главного меню** и запустить её как обычное приложение **Windows**
             - Обновить **Ubuntu**: в терминале **Ubuntu** запустить команду `sudo apt list --upgradable -a && sudo apt update && sudo apt full-upgrade -y`
             - Если забыли пароль от **Ubuntu**, `passwd имя_пользователя` (получить имя пользователя Ubuntu командой `ls /home`)
-            - Установить дополнительные утилиты в **Ubuntu**: в терминале **Ubuntu** запустить команду `sudo apt update && sudo apt install -y mc htop tree whois sl fastfetch wget curl inxi ncdu micro xclip xsel cmatrix caca-utils lm-sensors nyancat net-tools bat`
-            - Установить поддержку `g++` и `clang++` в терминале **Ubuntu**: `sudo apt update && sudo apt install -y build-essential git gdb ascii clang mingw-w64`
+            - Установить дополнительные утилиты в **Ubuntu**: в терминале **Ubuntu** запустить команду `sudo apt update && sudo apt install -y mc htop tree whois sl fastfetch wget curl inxi ncdu micro xclip xsel cmatrix caca-utils lm-sensors nyancat net-tools bat git ascii`
+            - Установить поддержку `g++` и `clang++` в терминале **Ubuntu**: `sudo apt update && sudo apt install -y build-essential git gdb  ascii clang mingw-w64`
             - Добавить пользователя в группу `sudo usermod -aG docker $USER` для полноценной работы **Docker** в **Ubuntu WSL**
             - Проверить работу **Ubuntu** командами:
             - `uname -a` - краткая информация о системе
-            - `neofetch` или `fastfetch` - наглядная ин-фа о системе
+            - `fastfetch` или `neofetch` - наглядная ин-фа о системе
             - `htop` - процессы в режиме реального времени. Выйти по **Q** или **Ctrl+C**
             - `sl`
             - `ascii -d`
             - `inxi -F`
             - `cmatrix` - выйти из "матрицы" по клавише **Q**
             - `cacafire`
-    - Для старых версий **Windows 10**. **(Не обязательно!)** Если обновления **Ubuntu** завершаться ошибкой, то надо в **Windows PowerShell** (Администратор) задать версию **WSL 2** по умолчанию: `wsl --set-default-version 2`
-    - Для удаления Ubuntu WSL выполнить: `wsl --unregister Unbuntu` и `winget uninstall Ubuntu` и перезагрузить компьютер
+    - Для старых версий **Windows 10**. **(Не обязательно!)** Если обновления **Ubuntu** завершаться ошибкой, то надо в **Windows PowerShell** (Администратор) возможно попробовать задать версию **WSL 2** по умолчанию: `wsl --set-default-version 2`
+    - Для удаления Ubuntu **WSL** выполнить: `wsl --unregister Unbuntu` и `winget uninstall Ubuntu` и перезагрузить компьютер
 
 > Если компьютер не тянет для **WSL 2.0** и **Docker**, то можно попробовать выполнять задачи в [**Codespace**](https://github.com/features/codespaces) (но не желательно, т.к. очень ограниченный функционал!)
 
@@ -208,7 +208,8 @@ git config --global user.email "rosa@mail.ru"
 1. Запустить **Docker Desktop** (можно добавить в автозагрузку для удобства);
 1. Установить и запустить тестовый контейнер `docker run hello-world`
 1. Если `docker run hello-world` не срабатывает, то в **Ubuntu WSL** выполните `sudo service docker restart`
-1. Включите интеграцию с **WSL**: После запуска **Docker Desktop** перейдите в **Settings** (Настройки) → Resources (Ресурсы) → **WSL Integration** (Интеграция с WSL).
+1. Включите интеграцию с **WSL**: После запуска **Docker Desktop** перейдите в **Settings** (Настройки) → Resources (Ресурсы) → **WSL Integration** (Интеграция с **WSL**).
+1. В **Docker Desktop Windows** настройте **File sharing** - `C:\`, **WSL integration** - `ON/Ubuntu` и **Choose Virtual Mashine** - `WSL 2
 1. Перезагрузить компьютер;
 
 > Если компьютер не тянет в **WSL 2.0** и **Docker**, то можно ограничется [Codespace](https://github.com/features/codespaces) (но не желательно, т.к. очень ограниченный функционал!)
@@ -235,14 +236,6 @@ git config --global user.email "rosa@mail.ru"
 
 Установка расширений
 
-> ### Установка расширений для `VS Code` может быть заблокирована!
-
-Временное решение, установка и обновление расширений вручную:
-- [Открываем сайт загрузчика расширений https://vsix.2i.gs/](https://vsix.2i.gs/)
-- [Находим нужное вам расширение на https://marketplace.visualstudio.com/](https://marketplace.visualstudio.com/)
-- Скачиваем нужные расширения в отдельную папку и устанавливаем их через `Install From VSIX` в `Extensions` редактора **VS Code**
-- Или используем НВП
-
 ![VS Code](/content/img/VSCODE_ext.jpg)
 
 - [WSL](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl)
@@ -257,6 +250,15 @@ git config --global user.email "rosa@mail.ru"
 - [Mermaid Ink](https://marketplace.visualstudio.com/items?itemName=timmilesdw.mermaid-ink)
 - [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
 - [XML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-xml)
+- [Container Tools](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-containers)
+
+> ### Установка расширений для `VS Code` может быть заблокирована!
+
+Временное решение, установка и обновление расширений вручную:
+- [Открываем сайт загрузчика расширений https://vsix.2i.gs/](https://vsix.2i.gs/)
+- [Находим нужное вам расширение на https://marketplace.visualstudio.com/](https://marketplace.visualstudio.com/)
+- Скачиваем нужные расширения в отдельную папку и устанавливаем их через `Install From VSIX` в `Extensions` редактора **VS Code**
+- Или используем КВН
 
 Открыть и закрыть интегрированный терминал **VS Code** по команде **Ctrl+~** (контрл тильда(Ё))
 
@@ -264,7 +266,7 @@ git config --global user.email "rosa@mail.ru"
 ```shell
 code .
 ```
-*code точка
+code точка
 
 [Подробней о настройках VSCode](https://gitflic.ru/project/rurewa/education/blob?file=content/Programming/VCode.md&branch=master&mode=markdown)
 

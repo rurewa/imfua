@@ -1,5 +1,7 @@
 ## Шпаргалка по Docker
 
+***
+
 ### Установка
 
 **Windows 10–11**
@@ -36,6 +38,10 @@ docker version
 ```shell
 docker --version
 ```
+Подробная информация по Docker:
+```shell
+docker info
+```
 Мониторинг ресурсов в реальном времени:
 ```shell
 docker stats
@@ -69,22 +75,6 @@ docker system df -v
 Артефакты и свободное место в buildx:
 ```shell
 docker buildx du
-```
-Очистить все ненужные тома:
-```shell
-docker volume prune -a
-```
-Удаление всех остановленных контейнеров
-```shell
-docker container prune
-```
-Удаление всех образов
-```shell
-docker image prune -a
-```
-Очистить кэш всех сборок:
-```shell
-docker builder prune -a
 ```
 
 ---
@@ -379,9 +369,26 @@ docker push username/my-app:1.0
 docker logout
 ```
 
----
+#### Обслуживание Docker
 
-### Очистка (Prune)
+Очистить все ненужные тома:
+```shell
+docker volume prune -a
+```
+Удаление всех остановленных контейнеров
+```shell
+docker container prune
+```
+Удаление всех образов
+```shell
+docker image prune -a
+```
+Очистить кэш всех сборок:
+```shell
+docker builder prune -a
+```
+
+Очистка (Prune)
 
 | Команда | Что удаляет |
 |---------|-------------|
