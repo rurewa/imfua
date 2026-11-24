@@ -14,7 +14,6 @@
 ---
 
 Эти проекты пока не обязательны
-- [videoeditor](https://github.com/trykimu/videoeditor)
 - [arcada](https://github.com/mehanix/arcada)
 
 > Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
