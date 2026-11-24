@@ -23,16 +23,16 @@
 * [x] Bash-программирование
 * [x] Скрипт синхронизации репозиториев
 * [x] Git - основы (Git-bash) + командная работа
-* [x] Markdown
-* [x] Mermaid
-* [x] Static Website on Github Pages - html+css+js
+* [x] Markdown + Mermaid
+* [x] Deploy Static Website on Github Pages (html+css+js)
 * [x] WSL 2.0 (Ubuntu)
 * [x] Docker - загрузка и установка + основы создания конейнеров и управления
 * [x] Docker готовые образы
 * [x] Dockerfile
 * [x] Docker Compose
 * [x] CI
-* [x] CI/CD
+* [x] CI/CD (Delivery)
+* [x] CI/CD (Deploy)
 * [.] БД на основе SQL
 * [ ] Virtual Box (Alt Education 11)
 * [ ] Контроллер домена и групповые политики на Alt Education 11
