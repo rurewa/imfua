@@ -71,6 +71,12 @@
 - Markdown + Mermaid
 - Git
     - Просмотр видеороликов по Git
+    - Лабораторные работы:
+        - Красивый README (Markdown+Mermaid) на свободную тему
+        - Командная работа по созданию красивого README (Markdown+Mermaid) на свободную тему
+        - Командная работа через Pull Request
+- GitHub Pages
+    - Деплой статического сайта HTML+CSS+JS на GitHub Pages
 - Знакомство с Docker:
     - Самостоятельно составить README.md с историей и описанием Docker: определение, история появления и развития, современное состояние. Dockerhub и готовые образы. Dockerfile и Docker Compose
     - Просмотр видеороликов по Docker
