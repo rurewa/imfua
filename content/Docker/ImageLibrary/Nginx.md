@@ -319,6 +319,11 @@ cmatrix
 > Выйти из `cmatrix` можно по **Q**
 
 ```shell
+cacafire
+```> Выйти из `cmatrix` можно по **Ctrl+C**
+
+
+```shell
 hollywood
 ```
 ![Скрин вывода hollywood]()bash
@@ -351,7 +356,7 @@ micro /usr/share/nginx/html/index.html
 </body>
 </html>
 ```
-отредайтируйте и сохраните по `Ctrl+S` и выйти из режима редактирования по `Ctrl+Q`
+отредайтируйте и сохраните по `Ctrl+S` и выйти из режима редактирования по `Ctrl+Q` или `F4`
 
 [Проверить изменения на открытой странице >>](http://localhost/)
 
