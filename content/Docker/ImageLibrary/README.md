@@ -3,10 +3,10 @@
 (CLI - command line interface, командная строка)
 
 - [Что такое Docker?](/content/Docker/Docs/ThatIsDocker.md)
+- [DockerHub](/content/Docker/Docs/DockerHub.md)
 
 ## Коллекция готовых Docker-образов из Docker Hub и других источников
 
-1. [DockerHub](/content/Docker/ImageLibrary/DockerHub.md)
 1. [Веб-сервер Nginx](/content/Docker/ImageLibrary/Nginx.md)
 1. [Welcome to Docker](/content/Docker/ImageLibrary/WelcomeToDocker.md)
 1. [Apache](/content/Docker/ImageLibrary/Apache.md)
