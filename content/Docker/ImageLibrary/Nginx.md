@@ -85,9 +85,8 @@ docker search nginx
 
 Получить, создать и запустить Nginx
 ```shell
-docker run -d --name my-nginx -p 80:80 nginx
+docker run -d --name my-nginx -p 81:80 nginx
 ```
-
 `docker run` объединяет команды `docker pull`, `docker create` и `docker start`
 
 Если запуск контейнера не удался, то проверьте уже созданные контейнеры с таким именем у себя
@@ -106,12 +105,11 @@ docker images
 
 Способ 1
 ```shell
-curl http://localhost/
+curl http://localhost:81/
 ```
-
 ![Скрин вывода curl](img/curl_nginx.png)
 
-Способ 2 - [открыть http://localhost/ адрес в браузере](http://localhost/)
+Способ 2 - [Открыть в браузере приложение из 2-го контейнера по адресу http://localhost:81/](http://localhost:81/)
 
 ![Скрин nginx в браузере](img/web_nginx.png)
 
@@ -154,12 +152,12 @@ docker rm my-nginx
 
 Если нужно создать ещё один контейнер из этого образа, то:
 ```shell
-docker run -d --name nginx-my -p 81:80 nginx
+docker run -d --name nginx-my -p 82:80 nginx
 ```
 
 > изменить имя и порт приложения!
 
-[Открыть в браузере приложение из 2-го контейнера по адресу http://localhost:81/](http://localhost:81/)
+[Открыть в браузере приложение из 2-го контейнера по адресу http://localhost:82/](http://localhost:82/)
 
 И можно удалить ещё и образ загруженного ранее **Nginx**:
 
@@ -167,7 +165,6 @@ docker run -d --name nginx-my -p 81:80 nginx
 ```shell
 docker images
 ```
-
 Опционально можно удалить по `id` нужный образ
 ```shell
 docker rmi id_образа
@@ -177,16 +174,10 @@ docker rmi id_образа
 
 ### 4. Проверить работу контейнера
 
-Можно снова установить и запустить Nginx (если его удаляли ранее)
-```shell
-docker run -d --name my-nginx -p 80:80 nginx
-```
-
 Показать наличие загруженного файла образа
 ```shell
 docker images
 ```
-
 ![Скрин образа](img/2_images.png)
 
 Показать только запущенные контейнеры
@@ -320,8 +311,8 @@ cmatrix
 
 ```shell
 cacafire
-```> Выйти из `cmatrix` можно по **Ctrl+C**
-
+```
+> Выйти из `cmatrix` можно по **Ctrl+C**
 
 ```shell
 hollywood
