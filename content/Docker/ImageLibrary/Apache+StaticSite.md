@@ -50,7 +50,7 @@ docker builder prune -a
 
 Создайте папку с HTML-файлом:
 ```shell
-mkdir my-site && cd my-site && touch index.html
+cd ~ && mkdir my-site && cd my-site && touch index.html
 ```
 Выполните эту команду для вставки в index.html короткого кода:
 ```shell
