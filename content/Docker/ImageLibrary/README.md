@@ -3,7 +3,7 @@
 (CLI - command line interface, командная строка)
 
 - [Что такое Docker?](/content/Docker/Docs/ThatIsDocker.md)
-- [DockerHub](/content/Docker/ImageLibrary/DockerHub.md)
+- [DockerHub](/content/Docker/Docs/DockerHub.md)
 
 ## Коллекция готовых Docker-образов из Docker Hub и других источников
 
