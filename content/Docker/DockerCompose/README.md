@@ -1,4 +1,6 @@
-## Проекты Docker Compose
+## Проекты Docker Compose CLI
+
+(CLI - command line interface, командная строка)
 
 - [Docker Compose - описание](/content/Docker/DockerCompose/DockerCompose.md)
 - [Joomla](/content/Docker/DockerCompose/joomla.md)
