@@ -158,16 +158,14 @@ docker pull welcome-to-docker
 ```shell
 docker ps -a
 ```
+
+[Проверка: открыть http://localhost:8088 в браузере](http://localhost:8088)
+
+
 Получить информацию по загруженному образу:
 ```shell
 docker inspect welcome-to-docker
 ```
-
-Проверить защенный конейнер **Nginx**
-```shell
-http://localhost:8088
-```
-
 Зайти в контейнер
 ```shell
 docker exec -it welcome-to-docker /bin/sh
