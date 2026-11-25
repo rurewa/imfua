@@ -54,6 +54,7 @@ docker builder prune -a
 ```shell
 docker run -d -v ollama_data:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
 ```
+Запустите эту нейросеть и задайте ей вопрос: "Что ты можешь?"
 ```shell
 docker exec -it ollama ollama run phi4
 ```
