@@ -50,7 +50,7 @@ docker container prune $(docker ps -q)
 ```shell
 docker ps -a
 ```
-![Тут нужен скриншот вывода](/content/Docker/Dockerfile/img/)
+![Тут нужен скриншот вывода](/content/img/)
 
 - Опционально можно удалить ненужные образы. Показать текущие образы:
 ```shell
@@ -117,17 +117,14 @@ curl http://localhost:81/
 ```shell
 docker pull nginx
 ```
-
 Получить информацию по загруженному образу:
 ```shell
 docker inspect nginx
 ```
-
 При необходимости остановить контейнер с таким именем:
 ```shell
 docker stop my-nginx
 ```
-
 Проверьте остановленное приложение в браузере по тому же адресу, обновив страницу по `Ctrl+R` или `F5`
 
 Перезапустить контейнер по имени
@@ -169,7 +166,6 @@ docker images
 ```shell
 docker rmi id_образа
 ```
-
 ![Скрин состояния docker images](img/rm_image.png)
 
 ### 4. Проверить работу контейнера
@@ -210,9 +206,7 @@ docker inspect my-nginx
 ```shell
 docker stats
 ```
-
 ![](img/2_stats.png)
-
 
 > Выйти из мониторинга контейнеров можно по `Ctrl+C`
 
@@ -235,12 +229,10 @@ docker logs -f my-nginx
 ```shell
 docker stop my-nginx
 ```
-
 Снова запустить контейнер
 ```shell
 docker start my-nginx
 ```
-
 Перезапустить контейнер
 ```shell
 docker restart my-nginx
@@ -296,7 +288,6 @@ apt update && apt install -y fastfetch htop inxi cmatrix hollywood caca-utils mc
 ```shell
 htop
 ```
-
 ![Скрин вывода htop]()
 
 > Выйти из `htop` можно по **Q**
@@ -304,7 +295,6 @@ htop
 ```shell
 cmatrix
 ```
-
 ![Скрин вывода cmatrix]()
 
 > Выйти из `cmatrix` можно по **Q**
@@ -349,7 +339,7 @@ micro /usr/share/nginx/html/index.html
 ```
 отредайтируйте и сохраните по `Ctrl+S` и выйти из режима редактирования по `Ctrl+Q` или `F4`
 
-[Проверить изменения на открытой странице >>](http://localhost/)
+[Проверить изменения на открытой странице >>](http://localhost:82/)
 
 ![Скрин изменённой страницы в браузере](img/)
 
@@ -357,22 +347,19 @@ micro /usr/share/nginx/html/index.html
 ```shell
 exit
 ```
-
 Остановить все запущенные контейнеры
 ```shell
 docker stop $(docker ps -q)
 ```
-
 Удалить все остановленные контейнеры
 ```shell
 docker container prune $(docker ps -q)
 ```
-
 Удалить все образы
 ```shell
 docker rmi $(docker images -q)
 ```
 
-**Результат оформить в виде отдельного `README.md` со скриншотами результатов ваших действий и прислать ссылку преподавателю.**
+**Результат оформить в виде отдельного `README.md` со скриншотами ваших действий и прислать ссылку преподавателю.**
 
 > Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
