@@ -15,6 +15,7 @@
 - [Самостоятельная работа по созданию контейнеров из готовых образов](/content/Docker/ImageLibrary/README.md)
 - [Самостоятельная работа по созданию контейнеров с помощью Dockerfile](/content/Docker/Dockerfile/README.md)
 - [Самостоятельная работа по созданию контейнеров с помощью Docker Compose](/content/Docker/DockerCompose/README.md)
+- [Лабораторные работы по CI/CI-CD](/content/DevOps/CI_CD/README.md)
 - [Индивидуальный проект статичесого сайта с CI/CD на GitHub Pages](/content/StudentPracticalsLabs/Indi_DeployStaticSite.md)
 - [Командная работа над статическим сайтом (HTML+CSS+JS) с CI/CD (Deploy) на GitHub Pages](/content/StudentPracticalsLabs/Teams_DeployStaticSite.md)
 
