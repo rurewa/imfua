@@ -78,7 +78,6 @@ docker rmi $(docker images -q)
 ```shell
 docker search nginx
 ```
-
 ![Скрин вывода поиска по слову nginx](img/docker_screen.png)
 
 Так же готовый образ можно искать в **Docker Desktop**
@@ -89,17 +88,19 @@ docker run -d --name my-nginx -p 81:80 nginx
 ```
 `docker run` объединяет команды `docker pull`, `docker create` и `docker start`
 
+![Тут нужен скриншот вывода]()
+
 Если запуск контейнера не удался, то проверьте уже созданные контейнеры с таким именем у себя
 ```shell
 docker ps -a
 ```
-
 ![Тут нужен скриншот](/content/Docker/ImageLibrary/img/12.png)
 
 Показать загруженный на ваш компьютер образ
 ```shell
 docker images
 ```
+![Тут нужен скриншот вывода]()
 
 Показать работающий Nginx
 
@@ -121,6 +122,8 @@ docker pull nginx
 ```shell
 docker inspect nginx
 ```
+![Тут нужен скриншот вывода]()
+
 При необходимости остановить контейнер с таким именем:
 ```shell
 docker stop my-nginx
@@ -144,13 +147,11 @@ docker stop my-nginx
 ```shell
 docker rm my-nginx
 ```
-
-![Тут нужен скриншот вывода]()
-
 Если нужно создать ещё один контейнер из этого образа, то:
 ```shell
 docker run -d --name nginx-my -p 82:80 nginx
 ```
+![Тут нужен скриншот вывода]()
 
 > изменить имя и порт приложения!
 
@@ -196,11 +197,13 @@ docker ps -a
 ```shell
 docker ps -a
 ```
+![Тут нужен скриншот вывода]()
 
 Показать подробности о контейнере
 ```shell
 docker inspect my-nginx
 ```
+![Тут нужен скриншот вывода]()
 
 Запустить мониторинг контейнеров
 ```shell
@@ -214,6 +217,7 @@ docker stats
 ```shell
 docker logs my-nginx
 ```
+![Тут нужен скриншот вывода]()
 
 Показать логи в режиме ожидания
 ```shell
@@ -253,8 +257,7 @@ docker exec -it my-nginx /bin/sh
 ```shell
 docker exec -it my-nginx sh
 ```
-
-внутри контейнера можно повыполнять некоторые команды Linux
+Внутри контейнера можно повыполнять некоторые команды Linux
 Получить информацию об ОС контейнера
 ```shell
 uname -a
